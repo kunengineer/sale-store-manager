@@ -1,0 +1,1 @@
+# sale-store-manager
