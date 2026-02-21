@@ -20,7 +20,7 @@ public class Stores {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "store_id")
-    private Long storeId;
+    private Integer storeId;
 
     @Column(name = "store_code", nullable = false, unique = true, length = 20)
     private String storeCode;
