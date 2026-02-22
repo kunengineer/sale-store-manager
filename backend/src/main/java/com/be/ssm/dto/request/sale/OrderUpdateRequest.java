@@ -15,4 +15,6 @@ public class OrderUpdateRequest {
     private BigDecimal taxAmount;
     private BigDecimal grandTotal;
     private String note;
+    private Integer tableId;
+    private Integer customerId;
 }

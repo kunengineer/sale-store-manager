@@ -16,4 +16,5 @@ public class InvoiceCreateRequest {
     private BigDecimal taxAmount;
     private BigDecimal totalAmount;
     private String pdfUrl;
+    private Integer orderId;
 }

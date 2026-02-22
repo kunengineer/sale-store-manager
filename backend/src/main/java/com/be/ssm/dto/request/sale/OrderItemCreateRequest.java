@@ -14,4 +14,6 @@ public class OrderItemCreateRequest {
     private BigDecimal discountAmt;
     private BigDecimal lineTotal;
     private String note;
+    private Integer orderId;
+    private Integer productId;
 }
