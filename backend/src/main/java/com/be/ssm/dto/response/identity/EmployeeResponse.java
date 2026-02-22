@@ -1,0 +1,26 @@
+package com.be.ssm.dto.response.identity;
+
+import lombok.Builder;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Data
+@Builder
+public class EmployeeResponse {
+    private Integer employeeId;
+    private Integer storeId;
+    private Integer roleId;
+    private String empCode;
+    private String fullName;
+    private String phone;
+    private String email;
+    private LocalDateTime dob;
+    private LocalDateTime hireDate;
+    private String salaryType;
+    private BigDecimal baseSalary;
+    private String idNumber;
+    private Boolean isActive;
+    private LocalDateTime createdAt;
+}
