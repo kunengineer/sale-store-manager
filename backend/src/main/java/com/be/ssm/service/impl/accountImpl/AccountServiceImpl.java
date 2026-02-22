@@ -1,4 +1,4 @@
-package com.be.ssm.service.impl.account;
+package com.be.ssm.service.impl.accountImpl;
 
 
 import com.be.ssm.dto.request.account.AccountCreateRequest;
