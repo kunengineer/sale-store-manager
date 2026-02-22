@@ -25,7 +25,7 @@ public class StoreTableServiceImpl implements StoreTableService {
     @Override
     public StoreTableResponse getById(Integer tableId) {
 
-        return mapper.toResponse(findById(tableId));
+        return mapper.toStoreTableResponse(findById(tableId));
     }
 
     @Override
@@ -35,10 +35,10 @@ public class StoreTableServiceImpl implements StoreTableService {
         StoreZones zone = storeZonesRepository.findById(createRequest.getStoreZoneId())
                 .orElseThrow();
 
-        StoreTables table = mapper.fromCreateToEntity(createRequest);
+        StoreTables table = mapper.toStoreTableEntity(createRequest);
         table.setZone(zone);
 
-        return mapper.toResponse(repository.save(table));
+        return mapper.toStoreTableResponse(repository.save(table));
     }
 
     @Override
@@ -50,9 +50,9 @@ public class StoreTableServiceImpl implements StoreTableService {
         StoreTables table = findById(tableId);
         table.setZone(zone);
 
-        mapper.updateEntity(updateRequest, table);
+        mapper.updateEntityFromRequest(updateRequest, table);
 
-        return mapper.toResponse(repository.save(table));
+        return mapper.toStoreTableResponse(repository.save(table));
     }
 
     private StoreTables findById(Integer tableId) {

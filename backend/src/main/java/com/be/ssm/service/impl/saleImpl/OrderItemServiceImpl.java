@@ -6,7 +6,6 @@ import com.be.ssm.dto.response.sale.OrderItemResponse;
 import com.be.ssm.entities.sales.OrderItems;
 import com.be.ssm.entities.sales.Orders;
 import com.be.ssm.mapper.sales.OrderItemMapper;
-import com.be.ssm.repository.product.ProductsRepository;
 import com.be.ssm.repository.sales.OrderItemsRepository;
 import com.be.ssm.repository.sales.OrdersRepository;
 import com.be.ssm.service.sale.OrderItemService;
@@ -27,7 +26,7 @@ public class OrderItemServiceImpl implements OrderItemService {
     public OrderItemResponse getById(Integer id) {
         log.info("Getting order item by id {}", id);
 
-        return mapper.toResponse(findById(id));
+        return mapper.toOrderItemResponse(findById(id));
     }
 
     @Override
@@ -36,10 +35,10 @@ public class OrderItemServiceImpl implements OrderItemService {
         // IS1: ProductVariant
         Orders order = findOrderById(request.getOrderId());
 
-        OrderItems orderItem = mapper.fromCreateToEntity(request);
+        OrderItems orderItem = mapper.toOrderItemEntity(request);
         orderItem.setOrder(order);
 
-        return mapper.toResponse(repository.save(orderItem));
+        return mapper.toOrderItemResponse(repository.save(orderItem));
     }
 
     @Override
@@ -53,7 +52,7 @@ public class OrderItemServiceImpl implements OrderItemService {
         mapper.updateEntityFromRequest(request, orderItem);
         orderItem.setOrder(order);
 
-        return mapper.toResponse(repository.save(orderItem));
+        return mapper.toOrderItemResponse(repository.save(orderItem));
     }
 
     private OrderItems findById(Integer id) {

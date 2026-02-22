@@ -3,7 +3,6 @@ package com.be.ssm.mapper.sales;
 import com.be.ssm.dto.request.sale.InvoiceCreateRequest;
 import com.be.ssm.dto.request.sale.InvoiceUpdateRequest;
 import com.be.ssm.dto.response.sale.InvoiceResponse;
-import com.be.ssm.entities.sales.Customers;
 import com.be.ssm.entities.sales.Invoices;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -12,9 +11,9 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface InvoicesMapper {
-    InvoiceResponse toResponse(Invoices invoices);
+    InvoiceResponse toInvoiceResponse(Invoices invoices);
 
-    Invoices fromCreateToEntity(InvoiceCreateRequest request);
+    Invoices toInvoiceEntity(InvoiceCreateRequest request);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(InvoiceUpdateRequest request,

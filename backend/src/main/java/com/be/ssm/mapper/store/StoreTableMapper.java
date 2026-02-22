@@ -8,16 +8,15 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.springframework.context.annotation.Bean;
 
 @Mapper(componentModel = "spring")
 public interface StoreTableMapper {
-    StoreTableResponse toResponse(StoreTables storeTables);
+    StoreTableResponse toStoreTableResponse(StoreTables storeTables);
 
-    StoreTables fromCreateToEntity(StoreTableCreateRequest request);
+    StoreTables toStoreTableEntity(StoreTableCreateRequest request);
 
     @BeanMapping(nullValuePropertyMappingStrategy
             = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntity(StoreTableUpdateRequest request,
-                      @MappingTarget StoreTables entity);
+    void updateEntityFromRequest(StoreTableUpdateRequest request,
+                                 @MappingTarget StoreTables entity);
 }

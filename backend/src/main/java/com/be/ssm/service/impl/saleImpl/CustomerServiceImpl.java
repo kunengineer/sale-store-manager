@@ -29,7 +29,7 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerResponse create(CustomerCreateRequest request) {
         log.info("Create new customer");
 
-        Customers customer = mapper.fromCreateToEntity(request);
+        Customers customer = mapper.toCustomerEntity(request);
 
         return mapper.toCustomerResponse(repository.save(customer));
     }

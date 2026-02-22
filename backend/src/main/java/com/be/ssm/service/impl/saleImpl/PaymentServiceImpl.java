@@ -4,7 +4,6 @@ import com.be.ssm.dto.request.sale.PaymentCreateRequest;
 import com.be.ssm.dto.request.sale.PaymentUpdateRequest;
 import com.be.ssm.dto.response.sale.PaymentResponse;
 import com.be.ssm.entities.sales.Invoices;
-import com.be.ssm.entities.sales.Orders;
 import com.be.ssm.entities.sales.Payments;
 import com.be.ssm.mapper.sales.PaymentMapper;
 import com.be.ssm.repository.sales.InvoicesRepository;
@@ -27,7 +26,7 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentResponse getById(Integer id) {
         log.info("Getting payment by id {}", id);
 
-        return mapper.toResponse(findById(id));
+        return mapper.toPaymentResponse(findById(id));
     }
 
     @Override
@@ -35,10 +34,10 @@ public class PaymentServiceImpl implements PaymentService {
         log.info("Create new payment");
         Invoices invoice = findInvoiceById(request.getInvoiceId());
 
-        Payments payment = mapper.fromCreateToEntity(request);
+        Payments payment = mapper.toPaymentEntity(request);
         payment.setInvoice(invoice);
 
-        return mapper.toResponse(repository.save(payment));
+        return mapper.toPaymentResponse(repository.save(payment));
     }
 
     @Override
@@ -51,7 +50,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         mapper.updateEntity(request, payment);
 
-        return mapper.toResponse(repository.save(payment));
+        return mapper.toPaymentResponse(repository.save(payment));
     }
 
     private Payments findById(Integer id) {

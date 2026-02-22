@@ -29,7 +29,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse getById(Integer id) {
         log.info("Getting order by id {}", id);
 
-        return mapper.toResponse(findById(id));
+        return mapper.toOrderResponse(findById(id));
     }
 
     @Override
@@ -39,11 +39,11 @@ public class OrderServiceImpl implements OrderService {
         StoreTables table = findStoreTableById(request.getTableId());
         Customers customer = request.getCustomerId() != null ? findCustomerById(request.getCustomerId()) : null;
 
-        Orders order = mapper.fromCreateToEntity(request);
+        Orders order = mapper.toOrderEntity(request);
         order.setStoreTables(table);
         order.setCustomers(customer);
 
-        return mapper.toResponse(repository.save(order));
+        return mapper.toOrderResponse(repository.save(order));
     }
 
     @Override
@@ -58,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStoreTables(table);
         order.setCustomers(customer);
 
-        return mapper.toResponse(repository.save(order));
+        return mapper.toOrderResponse(repository.save(order));
     }
 
     private Orders findById(Integer id) {

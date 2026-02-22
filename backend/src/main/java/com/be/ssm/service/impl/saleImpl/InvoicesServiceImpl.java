@@ -26,7 +26,7 @@ public class InvoicesServiceImpl implements InvoicesService {
     public InvoiceResponse getById(Integer id) {
         log.info("Getting invoice by id {}", id);
 
-        return mapper.toResponse(findById(id));
+        return mapper.toInvoiceResponse(findById(id));
     }
 
     @Override
@@ -34,10 +34,10 @@ public class InvoicesServiceImpl implements InvoicesService {
         log.info("Create new invoice");
         Orders order = findOrderById(request.getOrderId());
 
-        Invoices invoice = mapper.fromCreateToEntity(request);
+        Invoices invoice = mapper.toInvoiceEntity(request);
         invoice.setOrder(order);
 
-        return mapper.toResponse(repository.save(invoice));
+        return mapper.toInvoiceResponse(repository.save(invoice));
     }
 
     @Override
@@ -50,7 +50,7 @@ public class InvoicesServiceImpl implements InvoicesService {
 
         mapper.updateEntityFromRequest(request, invoice);
 
-        return mapper.toResponse(repository.save(invoice));
+        return mapper.toInvoiceResponse(repository.save(invoice));
     }
 
     private Invoices findById(Integer id) {
