@@ -18,4 +18,5 @@ public class EmployeeUpdateRequest {
     private BigDecimal baseSalary;
     private String idNumber;
     private Boolean isActive;
+    private Integer workShiftId;
 }

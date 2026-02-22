@@ -10,8 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class EmployeeResponse {
     private Integer employeeId;
-    private Integer storeId;
-    private Integer roleId;
+    private Integer roleName;
     private String empCode;
     private String fullName;
     private String phone;

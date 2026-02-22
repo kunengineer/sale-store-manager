@@ -22,10 +22,6 @@ public class WorkShifts {
     private Long shiftId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id", nullable = false)
-    private Employees employee;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
     private Stores store;
 

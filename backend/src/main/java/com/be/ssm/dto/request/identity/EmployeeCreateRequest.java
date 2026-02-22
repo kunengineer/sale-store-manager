@@ -19,4 +19,7 @@ public class EmployeeCreateRequest {
     private BigDecimal baseSalary;
     private String idNumber;
     private Boolean isActive;
+    private Integer storeId;
+    private Integer roleId;
+    private Integer workShiftId;
 }

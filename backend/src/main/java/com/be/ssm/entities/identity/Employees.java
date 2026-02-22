@@ -23,10 +23,14 @@ public class Employees {
     private Integer employeeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "work_shift_id", nullable = false)
+    private WorkShifts workShifts;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
     private Stores store;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
     private Roles role;
 
