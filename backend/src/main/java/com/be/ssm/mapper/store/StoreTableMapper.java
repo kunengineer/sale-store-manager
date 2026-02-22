@@ -1,6 +1,7 @@
 package com.be.ssm.mapper.store;
 
 import com.be.ssm.dto.request.store.StoreTableCreateRequest;
+import com.be.ssm.dto.request.store.StoreTableUpdateRequest;
 import com.be.ssm.dto.response.store.StoreTableResponse;
 import com.be.ssm.entities.store.StoreTables;
 import org.mapstruct.BeanMapping;
@@ -17,6 +18,6 @@ public interface StoreTableMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy
             = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntity(StoreTableCreateRequest request,
+    void updateEntity(StoreTableUpdateRequest request,
                       @MappingTarget StoreTables entity);
 }
