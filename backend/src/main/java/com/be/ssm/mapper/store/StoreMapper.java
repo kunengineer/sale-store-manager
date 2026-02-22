@@ -17,7 +17,7 @@ public interface StoreMapper {
     @Mapping(target = "createdAt", ignore = true)
     void updateEntityFromRequest(
             StoreUpdateRequest request,
-            @MappingTarget Stores product // existing entity
+            @MappingTarget Stores product
     );
 
 
