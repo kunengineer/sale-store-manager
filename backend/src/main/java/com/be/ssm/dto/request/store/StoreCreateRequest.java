@@ -20,4 +20,5 @@ public class StoreCreateRequest {
     private LocalTime openTime;
     private LocalTime closeTime;
     private Boolean isActive;
+    private Integer accountId;
 }

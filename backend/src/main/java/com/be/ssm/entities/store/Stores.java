@@ -1,6 +1,7 @@
 package com.be.ssm.entities.store;
 
 
+import com.be.ssm.entities.account.Accounts;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,10 +38,9 @@ public class Stores {
     @Column(name = "email", length = 100)
     private String email;
 
-    // FK → employees.employee_id
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "manager_id")
-//    private Employee manager;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    private Accounts manager;
 
     @Column(name = "open_time")
     private LocalTime openTime;
