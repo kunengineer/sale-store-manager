@@ -6,6 +6,7 @@ import com.be.ssm.dto.response.sale.OrderItemResponse;
 import com.be.ssm.entities.product.ProductVariants;
 import com.be.ssm.entities.sales.OrderItems;
 import com.be.ssm.entities.sales.Orders;
+import com.be.ssm.helper.OrderTotalCalculator;
 import com.be.ssm.mapper.sales.OrderItemMapper;
 import com.be.ssm.repository.product.ProductVariantsRepository;
 import com.be.ssm.repository.sales.OrderItemsRepository;
@@ -22,7 +23,11 @@ public class OrderItemServiceImpl implements OrderItemService {
     private final OrderItemsRepository repository;
     private final OrdersRepository ordersRepository;
     private final ProductVariantsRepository productVariantsRepository;
+
+    private final OrderTotalCalculator orderTotalCalculator;
+
     private final OrderItemMapper mapper;
+    // Order service
 
     @Override
     public OrderItemResponse getById(Integer id) {
@@ -41,7 +46,15 @@ public class OrderItemServiceImpl implements OrderItemService {
         orderItem.setProductVariants(productVariants);
         orderItem.setOrder(order);
 
-        return mapper.toOrderItemResponse(repository.save(orderItem));
+        repository.save(orderItem);
+
+        orderTotalCalculator.recalculate(order);
+        Orders saved = ordersRepository.save(order);
+
+        OrderItems savedItem = saved.getOrderItems()
+                .getLast();
+
+        return mapper.toOrderItemResponse(savedItem);
     }
 
     @Override
@@ -56,7 +69,15 @@ public class OrderItemServiceImpl implements OrderItemService {
         orderItem.setOrder(order);
         orderItem.setProductVariants(productVariants);
 
-        return mapper.toOrderItemResponse(repository.save(orderItem));
+        repository.save(orderItem);
+
+        orderTotalCalculator.recalculate(order);
+        Orders saved = ordersRepository.save(order);
+
+        OrderItems savedItem = saved.getOrderItems()
+                .getLast();
+
+        return mapper.toOrderItemResponse(savedItem);
     }
 
     private OrderItems findById(Integer id) {

@@ -46,4 +46,9 @@ public class OrderItems {
 
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
+
+    @PrePersist
+    public void prePersist() {
+
+    }
 }

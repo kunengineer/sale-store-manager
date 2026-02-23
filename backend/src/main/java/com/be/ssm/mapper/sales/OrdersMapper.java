@@ -11,8 +11,12 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.data.domain.Page;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {OrderItemMapper.class}
+)
 public interface OrdersMapper {
+
     OrderResponse toOrderResponse(Orders orders);
 
     Orders toOrderEntity(OrderCreateRequest request);

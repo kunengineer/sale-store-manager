@@ -15,34 +15,10 @@ public class OrderUpdateRequest {
     @Schema(example = "PENDING")
     private OrderStatus status;
 
-    @NotNull(message = "Subtotal must not be null")
-    @DecimalMin(value = "0.00", inclusive = true, message = "Subtotal must be >= 0")
-    @Digits(integer = 13, fraction = 2)
-    @Schema(example = "500000.00")
-    private BigDecimal subtotal;
-
-    @NotNull(message = "Discount amount must not be null")
-    @DecimalMin(value = "0.00", inclusive = true)
-    @Digits(integer = 13, fraction = 2)
-    @Schema(example = "50000.00")
-    private BigDecimal discountAmount;
-
     @DecimalMin(value = "0.00", inclusive = true)
     @Digits(integer = 13, fraction = 2)
     @Schema(example = "10.00")
     private BigDecimal vat;
-
-    @NotNull(message = "Tax amount must not be null")
-    @DecimalMin(value = "0.00", inclusive = true)
-    @Digits(integer = 13, fraction = 2)
-    @Schema(example = "45000.00")
-    private BigDecimal taxAmount;
-
-    @NotNull(message = "Grand total must not be null")
-    @DecimalMin(value = "0.00", inclusive = true)
-    @Digits(integer = 13, fraction = 2)
-    @Schema(example = "495000.00")
-    private BigDecimal grandTotal;
 
     @Size(max = 1000)
     @Schema(example = "Customer requests less ice")

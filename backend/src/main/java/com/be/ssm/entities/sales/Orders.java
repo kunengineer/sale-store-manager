@@ -1,5 +1,6 @@
 package com.be.ssm.entities.sales;
 
+import com.be.ssm.entities.identity.Employees;
 import com.be.ssm.entities.store.StoreTables;
 import com.be.ssm.entities.store.Stores;
 import com.be.ssm.enums.sales.OrderStatus;
@@ -10,7 +11,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -30,9 +35,9 @@ public class Orders {
     @JoinColumn(name = "customer_id")
     private Customers customers;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "employee_id", nullable = false)
-//    private Employees employees;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = false)
+    private Employees employees;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_table_id", nullable = false)
@@ -40,25 +45,32 @@ public class Orders {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private OrderStatus status;
+    private OrderStatus status = OrderStatus.PENDING;
 
     @Column(name = "subtotal", nullable = false, precision = 15, scale = 2)
     private BigDecimal subtotal;
 
     @Column(name = "discount_amount", nullable = false, precision = 15, scale = 2)
-    private BigDecimal discountAmount;
+    private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @Column(name = "vat", precision = 15, scale = 2)
-    private BigDecimal vat;
+    private BigDecimal vat = BigDecimal.ZERO;
 
     @Column(name = "tax_amount", nullable = false, precision = 15, scale = 2)
-    private BigDecimal taxAmount;
+    private BigDecimal taxAmount = BigDecimal.ZERO;
 
     @Column(name = "grand_total", nullable = false, precision = 15, scale = 2)
-    private BigDecimal grandTotal;
+    private BigDecimal grandTotal = BigDecimal.ZERO;
 
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
+
+    @OneToMany(
+            mappedBy = "order",
+            cascade = CascadeType.ALL,   // ← save Orders → tự save OrderItems
+            orphanRemoval = true         // ← xóa Orders → tự xóa OrderItems
+    )
+    private List<OrderItems> orderItems = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -69,8 +81,20 @@ public class Orders {
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
-        if (this.discountAmount == null) this.discountAmount = BigDecimal.ZERO;
-        if (this.taxAmount == null) this.taxAmount = BigDecimal.ZERO;
+        if (this.orderNumber == null) {
+            this.orderNumber = buildOrderNumber();
+        }
+    }
+
+    private String buildOrderNumber() {
+        String date = LocalDate.now().format(
+                DateTimeFormatter.ofPattern("yyyyMMdd")
+        );
+        String random = String.valueOf(
+                (int)(Math.random() * 900000) + 100000  // 6 chữ số
+        );
+        return "ORD-" + date + "-" + random;
+        // → ORD-20250623-482910
     }
 
 }
