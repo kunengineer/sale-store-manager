@@ -26,6 +26,10 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
     @Override
     public ProductVariantResponse create(ProductVariantCreateRequest request) {
+        if (repository.existsBySku(request.getSku())) {
+            // Handle duplicate SKU case, e.g., throw an exception or return an error response
+        }
+
         Products product = productsRepository.findById(request.getProductId())
                 .orElseThrow();
 

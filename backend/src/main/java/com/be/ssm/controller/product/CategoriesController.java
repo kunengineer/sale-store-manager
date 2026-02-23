@@ -1,6 +1,8 @@
 package com.be.ssm.controller.product;
 
 import com.be.ssm.dto.common.APIResponse;
+import com.be.ssm.dto.common.PageDTO;
+import com.be.ssm.dto.filter.CategoryFilter;
 import com.be.ssm.dto.request.product.CategoryCreateRequest;
 import com.be.ssm.dto.request.product.CategoryUpdateRequest;
 import com.be.ssm.dto.response.product.CategoriesResponse;
@@ -107,4 +109,24 @@ public class CategoriesController {
                 ));
     }
 
+    @GetMapping
+    public ResponseEntity<PageDTO<CategoriesResponse>> getAllCategories(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+
+            @RequestParam(required = false) Integer parentId,
+            @RequestParam(required = false) String categoryName,
+            @RequestParam(required = false) Boolean isActive
+    ) {
+
+        CategoryFilter filter = new CategoryFilter();
+        filter.setParentId(parentId);
+        filter.setCategoryName(categoryName);
+        filter.setIsActive(isActive);
+
+        PageDTO<CategoriesResponse> result =
+                categoriesService.getAllCategories(page, size, filter);
+
+        return ResponseEntity.ok(result);
+    }
 }

@@ -1,6 +1,8 @@
 package com.be.ssm.controller.sale;
 
 import com.be.ssm.dto.common.APIResponse;
+import com.be.ssm.dto.common.PageDTO;
+import com.be.ssm.dto.filter.OrderFilter;
 import com.be.ssm.dto.request.sale.OrderCreateRequest;
 import com.be.ssm.dto.request.sale.OrderUpdateRequest;
 import com.be.ssm.dto.response.sale.OrderResponse;
@@ -115,5 +117,31 @@ public class OrderController {
                         null,
                         httpRequest.getRequestURI()
                 ));
+    }
+
+
+    @GetMapping
+    @Operation(
+            summary = "Filter & get orders",
+            description = "Retrieve list of orders with filter and pagination"
+    )
+    public ResponseEntity<APIResponse<PageDTO<OrderResponse>>> getAllOrders(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @ModelAttribute OrderFilter filter,
+            HttpServletRequest httpRequest
+    ) {
+
+        PageDTO<OrderResponse> response = orderService.getAll(page, size, filter);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Orders retrieved successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
     }
 }

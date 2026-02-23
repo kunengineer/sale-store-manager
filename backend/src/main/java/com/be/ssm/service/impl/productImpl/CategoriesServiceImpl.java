@@ -1,5 +1,7 @@
 package com.be.ssm.service.impl.productImpl;
 
+import com.be.ssm.dto.common.PageDTO;
+import com.be.ssm.dto.filter.CategoryFilter;
 import com.be.ssm.dto.request.product.CategoryCreateRequest;
 import com.be.ssm.dto.request.product.CategoryUpdateRequest;
 import com.be.ssm.dto.response.product.CategoriesResponse;
@@ -7,7 +9,11 @@ import com.be.ssm.entities.product.Categories;
 import com.be.ssm.mapper.product.CategoriesMapper;
 import com.be.ssm.repository.product.CategoriesRepository;
 import com.be.ssm.service.product.CategoriesService;
+import com.be.ssm.specification.CategorySpecification;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +28,9 @@ public class CategoriesServiceImpl implements CategoriesService {
 
     @Override
     public CategoriesResponse create(CategoryCreateRequest request) {
+        if (repository.existsByName(request.getCategoryName())) {
+            // Handle duplicate category name case, e.g., throw an exception or return an error response
+        }
         Categories category = mapper.toCategoriesEntity(request);
         return mapper.toCategoriesResponse(repository.save(category));
     }
@@ -31,6 +40,13 @@ public class CategoriesServiceImpl implements CategoriesService {
         Categories category = findById(categoryId);
         mapper.updateEntityFromRequest(request, category);
         return mapper.toCategoriesResponse(repository.save(category));
+    }
+
+    @Override
+    public PageDTO<CategoriesResponse> getAllCategories(int page, int size, CategoryFilter filter) {
+        Specification<Categories> specification = CategorySpecification.filter(filter);
+        Pageable pageable = PageRequest.of(page-1, size);
+        return mapper.toPageDTO(repository.findAll(specification, pageable));
     }
 
     private Categories findById(Integer id) {

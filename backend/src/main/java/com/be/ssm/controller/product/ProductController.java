@@ -2,6 +2,8 @@ package com.be.ssm.controller.product;
 
 
 import com.be.ssm.dto.common.APIResponse;
+import com.be.ssm.dto.common.PageDTO;
+import com.be.ssm.dto.filter.ProductFilter;
 import com.be.ssm.dto.request.product.ProductCreateRequest;
 import com.be.ssm.dto.request.product.ProductUpdateRequest;
 import com.be.ssm.dto.response.product.ProductResponse;
@@ -14,6 +16,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -106,5 +110,30 @@ public class ProductController {
                         null,
                         httpRequest.getRequestURI()
                 ));
+    }
+
+    @GetMapping
+    @Operation(
+            summary = "Filter & get products",
+            description = "Retrieve list of products with filter and pagination"
+    )
+    public ResponseEntity<APIResponse<PageDTO<ProductResponse>>> getAll(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @ModelAttribute ProductFilter filter,
+            HttpServletRequest httpRequest
+    ) {
+
+        PageDTO<ProductResponse> response = productService.getAll(page, size, filter);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Products retrieved successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
     }
 }

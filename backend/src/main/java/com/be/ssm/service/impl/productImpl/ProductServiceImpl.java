@@ -1,5 +1,7 @@
 package com.be.ssm.service.impl.productImpl;
 
+import com.be.ssm.dto.common.PageDTO;
+import com.be.ssm.dto.filter.ProductFilter;
 import com.be.ssm.dto.request.product.ProductCreateRequest;
 import com.be.ssm.dto.request.product.ProductUpdateRequest;
 import com.be.ssm.dto.response.product.ProductResponse;
@@ -10,7 +12,11 @@ import com.be.ssm.repository.product.CategoriesRepository;
 import com.be.ssm.repository.product.ProductsRepository;
 import com.be.ssm.service.product.CategoriesService;
 import com.be.ssm.service.product.ProductService;
+import com.be.ssm.specification.ProductSpecification;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,6 +34,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse create(ProductCreateRequest request) {
+
         Categories category = categoriesRepository.findById(request.getCategoryId())
                 .orElseThrow();
 
@@ -42,6 +49,13 @@ public class ProductServiceImpl implements ProductService {
         Products product = findById(productId);
         mapper.updateEntityFromRequest(request, product);
         return mapper.toProductResponse(repository.save(product));
+    }
+
+    @Override
+    public PageDTO<ProductResponse> getAll(int page, int size, ProductFilter filter) {
+        Specification<Products> specification = ProductSpecification.filter(filter);
+        Pageable pageable = PageRequest.of(page-1, size);
+        return mapper.toPageDTO(repository.findAll(specification, pageable));
     }
 
     private Products findById(Integer id) {

@@ -1,5 +1,7 @@
 package com.be.ssm.service.impl.saleImpl;
 
+import com.be.ssm.dto.common.PageDTO;
+import com.be.ssm.dto.filter.OrderFilter;
 import com.be.ssm.dto.request.sale.OrderCreateRequest;
 import com.be.ssm.dto.request.sale.OrderUpdateRequest;
 import com.be.ssm.dto.response.sale.OrderResponse;
@@ -11,8 +13,12 @@ import com.be.ssm.repository.sales.CustomersRepository;
 import com.be.ssm.repository.sales.OrdersRepository;
 import com.be.ssm.repository.store.StoreTablesRepository;
 import com.be.ssm.service.sale.OrderService;
+import com.be.ssm.specification.OrderSpecification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -59,6 +65,13 @@ public class OrderServiceImpl implements OrderService {
         order.setCustomers(customer);
 
         return mapper.toOrderResponse(repository.save(order));
+    }
+
+    @Override
+    public PageDTO<OrderResponse> getAll(int page, int size, OrderFilter filter) {
+        Specification<Orders> specification = OrderSpecification.filter(filter);
+        Pageable pageable = PageRequest.of(page-1, size);
+        return mapper.toPageDTO(repository.findAll(specification, pageable));
     }
 
     private Orders findById(Integer id) {
