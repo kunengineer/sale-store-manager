@@ -24,7 +24,7 @@ public class Employees {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "work_shift_id", nullable = false)
-    private WorkShifts workShifts;
+    private WorkShifts workShift;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)

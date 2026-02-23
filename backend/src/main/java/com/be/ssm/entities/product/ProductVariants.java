@@ -21,7 +21,7 @@ public class ProductVariants {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
-    private Products products;
+    private Products product;
 
     @Column(name = "variant_name", nullable = false, length = 100)
     private String variantName;
