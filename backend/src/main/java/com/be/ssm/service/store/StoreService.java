@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 public interface StoreService {
     StoreResponse getById(Integer id);
 
+    StoreResponse getByManager();
+
     StoreResponse create(StoreCreateRequest request);
 
     StoreResponse update(StoreUpdateRequest request, Integer storeId);

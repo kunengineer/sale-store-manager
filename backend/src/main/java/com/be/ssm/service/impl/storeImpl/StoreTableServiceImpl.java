@@ -9,6 +9,7 @@ import com.be.ssm.mapper.store.StoreTableMapper;
 import com.be.ssm.repository.store.StoreTablesRepository;
 import com.be.ssm.repository.store.StoreZonesRepository;
 import com.be.ssm.service.store.StoreTableService;
+import com.sun.jdi.request.DuplicateRequestException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,8 @@ public class StoreTableServiceImpl implements StoreTableService {
         StoreZones zone = storeZonesRepository.findById(createRequest.getStoreZoneId())
                 .orElseThrow();
 
+        isDuplicateTableCode(zone.getZoneId(), createRequest.getTableCode());
+
         StoreTables table = mapper.toStoreTableEntity(createRequest);
         table.setZone(zone);
 
@@ -47,12 +50,27 @@ public class StoreTableServiceImpl implements StoreTableService {
         StoreZones zone = storeZonesRepository.findById(updateRequest.getStoreZoneId())
                 .orElseThrow();
 
+        isDuplicateTableCode(zone.getZoneId(), updateRequest.getTableCode());
+
         StoreTables table = findById(tableId);
         table.setZone(zone);
 
         mapper.updateEntityFromRequest(updateRequest, table);
 
         return mapper.toStoreTableResponse(repository.save(table));
+    }
+
+    private void isDuplicateTableCode(Integer zoneId, String tableCode) {
+        if (repository.existsByZoneZoneIdAndTableCode(
+                zoneId,
+                tableCode)) {
+
+            throw new DuplicateRequestException(
+                    String.format("Table code '%s' already exists in zone %d",
+                            tableCode,
+                            zoneId)
+            );
+        }
     }
 
     private StoreTables findById(Integer tableId) {
