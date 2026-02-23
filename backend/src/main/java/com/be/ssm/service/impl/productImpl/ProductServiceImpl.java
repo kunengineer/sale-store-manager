@@ -54,7 +54,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public PageDTO<ProductResponse> getAll(int page, int size, ProductFilter filter) {
         Specification<Products> specification = ProductSpecification.filter(filter);
-        Pageable pageable = PageRequest.of(page-1, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
         return mapper.toPageDTO(repository.findAll(specification, pageable));
     }
 

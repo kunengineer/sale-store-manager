@@ -70,7 +70,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public PageDTO<OrderResponse> getAll(int page, int size, OrderFilter filter) {
         Specification<Orders> specification = OrderSpecification.filter(filter);
-        Pageable pageable = PageRequest.of(page-1, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
         return mapper.toPageDTO(repository.findAll(specification, pageable));
     }
 

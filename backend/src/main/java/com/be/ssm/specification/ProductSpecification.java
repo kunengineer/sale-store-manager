@@ -11,6 +11,9 @@ import java.util.List;
 public class ProductSpecification {
     public static Specification<Products> filter(ProductFilter filter) {
         return (root, query, cb) -> {
+            if (filter == null) {
+                return cb.conjunction();
+            }
             List<Predicate> predicates = new ArrayList<>();
 
             // Filter theo categoryId

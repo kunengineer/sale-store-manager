@@ -45,7 +45,7 @@ public class CategoriesServiceImpl implements CategoriesService {
     @Override
     public PageDTO<CategoriesResponse> getAllCategories(int page, int size, CategoryFilter filter) {
         Specification<Categories> specification = CategorySpecification.filter(filter);
-        Pageable pageable = PageRequest.of(page-1, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
         return mapper.toPageDTO(repository.findAll(specification, pageable));
     }
 
