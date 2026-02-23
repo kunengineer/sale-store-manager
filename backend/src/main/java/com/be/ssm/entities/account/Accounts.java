@@ -19,7 +19,7 @@ public class Accounts {
     @Column(name = "account_id")
     private Integer accountId;
 
-    @Column(name = "username", nullable = false)
+    @Column(name = "username", nullable = false, unique = true, length = 50)
     private String username;
 
     @Column(name = "password", nullable = false)
