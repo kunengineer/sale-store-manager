@@ -30,7 +30,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
                 .orElseThrow();
 
         ProductVariants variant = mapper.toProductVariantEntity(request);
-        variant.setProducts(product);
+        variant.setProduct(product);
 
         return mapper.toProductVariantResponse(repository.save(variant));
     }
