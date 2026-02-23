@@ -46,7 +46,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employees employee = mapper.toEmployeeEntity(request);
         employee.setRole(role);
         employee.setStore(store);
-        employee.setWorkShifts(workShifts);
+        employee.setWorkShift(workShifts);
 
         return mapper.toEmployeeResponse(repository.save(employee));
     }
@@ -59,7 +59,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Employees employee = findById(id);
         employee.setRole(role);
-        employee.setWorkShifts(workShifts);
+        employee.setWorkShift(workShifts);
 
         mapper.updateEntityFromRequest(request, employee);
 
