@@ -1,5 +1,6 @@
 package com.be.ssm.entities.sales;
 
+import com.be.ssm.entities.product.ProductVariants;
 import com.be.ssm.entities.product.Products;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,8 +26,8 @@ public class OrderItems {
     private Orders order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Products product;
+    @JoinColumn(name = "product_variants_id", nullable = false)
+    private ProductVariants productVariants;
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;

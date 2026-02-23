@@ -3,9 +3,11 @@ package com.be.ssm.service.impl.saleImpl;
 import com.be.ssm.dto.request.sale.OrderItemCreateRequest;
 import com.be.ssm.dto.request.sale.OrderItemUpdateRequest;
 import com.be.ssm.dto.response.sale.OrderItemResponse;
+import com.be.ssm.entities.product.ProductVariants;
 import com.be.ssm.entities.sales.OrderItems;
 import com.be.ssm.entities.sales.Orders;
 import com.be.ssm.mapper.sales.OrderItemMapper;
+import com.be.ssm.repository.product.ProductVariantsRepository;
 import com.be.ssm.repository.sales.OrderItemsRepository;
 import com.be.ssm.repository.sales.OrdersRepository;
 import com.be.ssm.service.sale.OrderItemService;
@@ -19,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class OrderItemServiceImpl implements OrderItemService {
     private final OrderItemsRepository repository;
     private final OrdersRepository ordersRepository;
-    // private final ProductsRepository productsRepository;
+    private final ProductVariantsRepository productVariantsRepository;
     private final OrderItemMapper mapper;
 
     @Override
@@ -32,10 +34,11 @@ public class OrderItemServiceImpl implements OrderItemService {
     @Override
     public OrderItemResponse create(OrderItemCreateRequest request) {
         log.info("Create new order item");
-        // IS1: ProductVariant
+        ProductVariants productVariants = findProductVariantById(request.getProductVariantId());
         Orders order = findOrderById(request.getOrderId());
 
         OrderItems orderItem = mapper.toOrderItemEntity(request);
+        orderItem.setProductVariants(productVariants);
         orderItem.setOrder(order);
 
         return mapper.toOrderItemResponse(repository.save(orderItem));
@@ -46,11 +49,12 @@ public class OrderItemServiceImpl implements OrderItemService {
         log.info("Update order item with id {}", id);
 
         OrderItems orderItem = findById(id);
-        // IS1: ProductVariant
+        ProductVariants productVariants = findProductVariantById(request.getProductVariantId());
         Orders order = findOrderById(request.getOrderId());
 
         mapper.updateEntityFromRequest(request, orderItem);
         orderItem.setOrder(order);
+        orderItem.setProductVariants(productVariants);
 
         return mapper.toOrderItemResponse(repository.save(orderItem));
     }
@@ -59,6 +63,13 @@ public class OrderItemServiceImpl implements OrderItemService {
         log.info("Finding order item by id {}", id);
 
         return repository.findById(id)
+                .orElseThrow();
+    }
+
+    private ProductVariants findProductVariantById(Integer id) {
+        log.info("Finding product variant by id {}", id);
+
+        return productVariantsRepository.findById(id)
                 .orElseThrow();
     }
 

@@ -27,7 +27,7 @@ public class Orders {
     private String orderNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "customer_id")
     private Customers customers;
 
 //    @ManyToOne(fetch = FetchType.LAZY)
