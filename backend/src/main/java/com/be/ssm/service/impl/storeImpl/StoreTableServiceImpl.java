@@ -1,5 +1,7 @@
 package com.be.ssm.service.impl.storeImpl;
 
+import com.be.ssm.dto.common.PageDTO;
+import com.be.ssm.dto.filter.StoreTableFilter;
 import com.be.ssm.dto.request.store.StoreTableCreateRequest;
 import com.be.ssm.dto.request.store.StoreTableUpdateRequest;
 import com.be.ssm.dto.response.store.StoreTableResponse;
@@ -9,9 +11,13 @@ import com.be.ssm.mapper.store.StoreTableMapper;
 import com.be.ssm.repository.store.StoreTablesRepository;
 import com.be.ssm.repository.store.StoreZonesRepository;
 import com.be.ssm.service.store.StoreTableService;
+import com.be.ssm.specification.StoreTableSpecification;
 import com.sun.jdi.request.DuplicateRequestException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -58,6 +64,16 @@ public class StoreTableServiceImpl implements StoreTableService {
         mapper.updateEntityFromRequest(updateRequest, table);
 
         return mapper.toStoreTableResponse(repository.save(table));
+    }
+
+    @Override
+    public PageDTO<StoreTableResponse> filter(int page, int size, StoreTableFilter filter) {
+        log.info("Filtering store table");
+
+        Specification<StoreTables> spec = StoreTableSpecification.filter(filter);
+        Pageable pageable = PageRequest.of(page -1, size);
+
+        return mapper.toPageDTO(repository.findAll(spec, pageable));
     }
 
     private void isDuplicateTableCode(Integer zoneId, String tableCode) {

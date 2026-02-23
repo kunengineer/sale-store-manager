@@ -2,6 +2,8 @@ package com.be.ssm.controller.store;
 
 
 import com.be.ssm.dto.common.APIResponse;
+import com.be.ssm.dto.common.PageDTO;
+import com.be.ssm.dto.filter.StoreTableFilter;
 import com.be.ssm.dto.request.store.StoreTableCreateRequest;
 import com.be.ssm.dto.request.store.StoreTableUpdateRequest;
 import com.be.ssm.dto.response.store.StoreTableResponse;
@@ -117,5 +119,31 @@ public class StoreTableController {
                         null,
                         httpRequest.getRequestURI()
                 ));
+    }
+
+    @GetMapping("/filter")
+    @Operation(
+            summary = "Filter & get store tables",
+            description = "Retrieve list of store tables with filter and pagination"
+    )
+    public ResponseEntity<APIResponse<PageDTO<StoreTableResponse>>> filter(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @ModelAttribute StoreTableFilter filter,
+            HttpServletRequest httpRequest
+    ) {
+
+        PageDTO<StoreTableResponse> response =
+                storeTableService.filter(page, size, filter);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Store tables retrieved successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
     }
 }

@@ -1,6 +1,8 @@
 package com.be.ssm.controller.store;
 
 import com.be.ssm.dto.common.APIResponse;
+import com.be.ssm.dto.common.PageDTO;
+import com.be.ssm.dto.filter.StoreZoneFilter;
 import com.be.ssm.dto.request.store.StoreZonesCreateRequest;
 import com.be.ssm.dto.request.store.StoreZonesUpdateRequest;
 import com.be.ssm.dto.response.store.StoreZoneResponse;
@@ -114,5 +116,31 @@ public class StoreZoneController {
                         null,
                         httpRequest.getRequestURI()
                 ));
+    }
+
+    @GetMapping("/filter")
+    @Operation(
+            summary = "Filter & get store zones",
+            description = "Retrieve list of store zones with filter and pagination"
+    )
+    public ResponseEntity<APIResponse<PageDTO<StoreZoneResponse>>> filter(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @ModelAttribute StoreZoneFilter filter,
+            HttpServletRequest httpRequest
+    ) {
+
+        PageDTO<StoreZoneResponse> response =
+                storeZoneService.filter(page, size, filter);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Store zones retrieved successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
     }
 }

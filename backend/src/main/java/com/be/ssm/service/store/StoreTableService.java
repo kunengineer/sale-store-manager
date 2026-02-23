@@ -1,5 +1,7 @@
 package com.be.ssm.service.store;
 
+import com.be.ssm.dto.common.PageDTO;
+import com.be.ssm.dto.filter.StoreTableFilter;
 import com.be.ssm.dto.request.store.StoreTableCreateRequest;
 import com.be.ssm.dto.request.store.StoreTableUpdateRequest;
 import com.be.ssm.dto.response.store.StoreTableResponse;
@@ -12,4 +14,6 @@ public interface StoreTableService {
     StoreTableResponse create(StoreTableCreateRequest createRequest);
 
     StoreTableResponse update(StoreTableUpdateRequest updateRequest, Integer tableId);
+
+    PageDTO<StoreTableResponse> filter(int page, int size, StoreTableFilter filter);
 }

@@ -1,5 +1,7 @@
 package com.be.ssm.service.impl.storeImpl;
 
+import com.be.ssm.dto.common.PageDTO;
+import com.be.ssm.dto.filter.StoreZoneFilter;
 import com.be.ssm.dto.request.store.StoreZonesCreateRequest;
 import com.be.ssm.dto.request.store.StoreZonesUpdateRequest;
 import com.be.ssm.dto.response.store.StoreZoneResponse;
@@ -9,8 +11,12 @@ import com.be.ssm.mapper.store.StoreZoneMapper;
 import com.be.ssm.repository.store.StoreZonesRepository;
 import com.be.ssm.repository.store.StoresRepository;
 import com.be.ssm.service.store.StoreZoneService;
+import com.be.ssm.specification.StoreZoneSpecification;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,6 +58,16 @@ public class StoreZoneServiceImpl implements StoreZoneService {
         mapper.updateEntityFromRequest(updateRequest, storeZones);
 
         return mapper.toStoreZoneResponse(repository.save(storeZones));
+    }
+
+    @Override
+    public PageDTO<StoreZoneResponse> filter(int page, int size, StoreZoneFilter filter) {
+        log.info("Filtering store zones");
+
+        Specification<StoreZones> spec = StoreZoneSpecification.filter(filter);
+        Pageable pageable = PageRequest.of(page-1, size);
+
+        return mapper.toPageDTO(repository.findAll(spec, pageable));
     }
 
     private StoreZones findById(Integer id) {
