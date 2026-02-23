@@ -1,0 +1,119 @@
+package com.be.ssm.controller.sale;
+
+import com.be.ssm.dto.common.APIResponse;
+import com.be.ssm.dto.request.sale.OrderCreateRequest;
+import com.be.ssm.dto.request.sale.OrderUpdateRequest;
+import com.be.ssm.dto.response.sale.OrderResponse;
+import com.be.ssm.service.sale.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/orders")
+@Tag(name = "Order Management", description = "APIs for managing orders in system")
+public class OrderController {
+
+    private final OrderService orderService;
+
+    // =========================
+    // CREATE ORDER
+    // =========================
+    @PostMapping
+    @Operation(
+            summary = "Create new order",
+            description = "Create a new order with order details",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Order created successfully",
+                            content = @Content(schema = @Schema(implementation = OrderResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<APIResponse<OrderResponse>> createOrder(
+            @RequestBody @Valid OrderCreateRequest request,
+            HttpServletRequest httpRequest) {
+
+        OrderResponse response = orderService.create(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new APIResponse<>(
+                        true,
+                        "Order created successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                ));
+    }
+
+    // =========================
+    // GET ORDER BY ID
+    // =========================
+    @GetMapping("/{id}")
+    @Operation(
+            summary = "Get order by id",
+            description = "Retrieve order information by order id",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Order retrieved successfully",
+                            content = @Content(schema = @Schema(implementation = OrderResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Order not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<APIResponse<OrderResponse>> getOrderById(
+            @PathVariable Integer id,
+            HttpServletRequest httpRequest) {
+
+        OrderResponse response = orderService.getById(id);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Order retrieved successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                ));
+    }
+
+    // =========================
+    // UPDATE ORDER
+    // =========================
+    @PutMapping("/{id}")
+    @Operation(
+            summary = "Update order",
+            description = "Update order information by order id",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Order updated successfully",
+                            content = @Content(schema = @Schema(implementation = OrderResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data"),
+                    @ApiResponse(responseCode = "404", description = "Order not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<APIResponse<OrderResponse>> updateOrder(
+            @PathVariable Integer id,
+            @RequestBody @Valid OrderUpdateRequest request,
+            HttpServletRequest httpRequest) {
+
+        OrderResponse response = orderService.update(request, id);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Order updated successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                ));
+    }
+}
