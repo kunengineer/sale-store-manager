@@ -4,8 +4,10 @@ import com.be.ssm.dto.request.product.ProductVariantCreateRequest;
 import com.be.ssm.dto.request.product.ProductVariantUpdateRequest;
 import com.be.ssm.dto.response.product.ProductVariantResponse;
 import com.be.ssm.entities.product.ProductVariants;
+import com.be.ssm.entities.product.Products;
 import com.be.ssm.mapper.product.ProductVariantMapper;
 import com.be.ssm.repository.product.ProductVariantsRepository;
+import com.be.ssm.repository.product.ProductsRepository;
 import com.be.ssm.service.product.ProductVariantService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class ProductVariantServiceImpl implements ProductVariantService {
     private final ProductVariantsRepository repository;
     private final ProductVariantMapper mapper;
+    private final ProductsRepository productsRepository;
 
     @Override
     public ProductVariantResponse getById(Integer id) {
@@ -23,7 +26,12 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
     @Override
     public ProductVariantResponse create(ProductVariantCreateRequest request) {
+        Products product = productsRepository.findById(request.getProductId())
+                .orElseThrow();
+
         ProductVariants variant = mapper.toProductVariantEntity(request);
+        variant.setProducts(product);
+
         return mapper.toProductVariantResponse(repository.save(variant));
     }
 
