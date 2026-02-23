@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class StoreTableUpdateRequest {
     private Integer storeZoneId;
     private String tableCode;

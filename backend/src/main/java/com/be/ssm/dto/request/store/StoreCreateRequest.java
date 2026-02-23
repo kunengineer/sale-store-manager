@@ -38,19 +38,13 @@ public class StoreCreateRequest {
     @Schema(example = "store@example.com")
     private String email;
 
-    @NotNull(message = "Open time must not be null")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     @Schema(type = "string", example = "08:00")
     private LocalTime openTime;
 
-    @NotNull(message = "Close time must not be null")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     @Schema(type = "string", example = "22:00")
     private LocalTime closeTime;
-
-    @NotNull(message = "Active status must not be null")
-    @Schema(example = "true")
-    private Boolean isActive;
 
     @NotNull(message = "Account id must not be null")
     @Positive(message = "Account id must be positive")
