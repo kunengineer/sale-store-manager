@@ -13,6 +13,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -27,6 +29,15 @@ public class StoreServiceImpl implements StoreService {
         log.info("Getting store by id {}", id);
 
         return mapper.toStoreResponse(findById(id));
+    }
+
+    @Override
+    public StoreResponse getByManager() {
+
+        Accounts manager = new Accounts();
+        Stores store = repository.findStoresByManager(manager);
+
+        return mapper.toStoreResponse(store);
     }
 
     @Override
