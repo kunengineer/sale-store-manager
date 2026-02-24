@@ -4,6 +4,8 @@ import com.be.ssm.dto.request.sale.CustomerCreateRequest;
 import com.be.ssm.dto.request.sale.CustomerUpdateRequest;
 import com.be.ssm.dto.response.sale.CustomerResponse;
 import com.be.ssm.entities.sales.Customers;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.sales.CustomerMapper;
 import com.be.ssm.repository.sales.CustomersRepository;
 import com.be.ssm.service.sale.CustomerService;
@@ -49,7 +51,7 @@ public class CustomerServiceImpl implements CustomerService {
         log.info("Finding customer by id {}", id);
 
         return repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.CUSTOMER_NOT_FOUND));
     }
 
 }

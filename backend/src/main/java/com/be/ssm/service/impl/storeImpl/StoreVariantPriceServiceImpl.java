@@ -6,6 +6,8 @@ import com.be.ssm.dto.response.store.StoreVariantPriceResponse;
 import com.be.ssm.entities.product.ProductVariants;
 import com.be.ssm.entities.store.StoreVariantPrice;
 import com.be.ssm.entities.store.Stores;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.store.StoreVariantPriceMapper;
 import com.be.ssm.repository.product.ProductVariantsRepository;
 import com.be.ssm.repository.store.StoreVariantPriceRepository;
@@ -25,10 +27,10 @@ public class StoreVariantPriceServiceImpl implements StoreVariantPriceService {
     @Override
     public StoreVariantPriceResponse create(StoreVariantPriceCreateRequest request) {
         Stores store = storeRepository.findById(request.getStoreId())
-                .orElseThrow(() -> new RuntimeException("Store not found with id: " + request.getStoreId()));
+                .orElseThrow(() -> new CustomException(Error.STORE_NOT_FOUND));
 
         ProductVariants variant = variantRepository.findById(request.getVariantId())
-                .orElseThrow(() -> new RuntimeException("Variant not found with id: " + request.getVariantId()));
+                .orElseThrow(() -> new CustomException(Error.PRODUCT_VARIANT_NOT_FOUND));
 
         StoreVariantPrice storeVariantPrice = storeVariantPriceMapper.toStoreVariantPriceEntity(request);
         storeVariantPrice.setStore(store);
@@ -50,6 +52,6 @@ public class StoreVariantPriceServiceImpl implements StoreVariantPriceService {
 
     private StoreVariantPrice getStoreVariantPriceById(Integer id) {
         return storeVariantPriceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Store variant price not found with id: " + id));
+                .orElseThrow(() -> new CustomException(Error.STORE_VARIANT_PRICE_NOT_FOUND));
     }
 }

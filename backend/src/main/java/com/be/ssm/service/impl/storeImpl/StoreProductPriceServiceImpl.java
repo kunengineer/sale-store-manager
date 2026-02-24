@@ -7,6 +7,8 @@ import com.be.ssm.entities.product.Products;
 import com.be.ssm.entities.store.StoreProductPrice;
 import com.be.ssm.entities.store.StoreVariantPrice;
 import com.be.ssm.entities.store.Stores;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.store.StoreProductPriceMapper;
 import com.be.ssm.repository.product.ProductsRepository;
 import com.be.ssm.repository.store.StoreProductPriceRepository;
@@ -27,10 +29,10 @@ public class StoreProductPriceServiceImpl implements StoreProductPriceService {
     public StoreProductPriceResponse create(StoreProductPriceCreateRequest request) {
 
         Stores stores = storeRepository.findById(request.getStoreId())
-                .orElseThrow(() -> new RuntimeException("Store not found"));
+                .orElseThrow(() -> new CustomException(Error.STORE_NOT_FOUND));
 
         Products products = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new CustomException(Error.PRODUCT_NOT_FOUND));
 
         StoreProductPrice entity = mapper.toStoreProductPriceEntity(request);
         entity.setStore(stores);
@@ -49,6 +51,6 @@ public class StoreProductPriceServiceImpl implements StoreProductPriceService {
 
     private StoreProductPrice findEntityById(Integer id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("StoreProductPrice not found"));
+                .orElseThrow(() -> new CustomException(Error.STORE_PRODUCT_PRICE_NOT_FOUND));
     }
 }

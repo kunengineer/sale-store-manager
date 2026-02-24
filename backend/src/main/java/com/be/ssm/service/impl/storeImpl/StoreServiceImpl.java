@@ -5,6 +5,8 @@ import com.be.ssm.dto.request.store.StoreUpdateRequest;
 import com.be.ssm.dto.response.store.StoreResponse;
 import com.be.ssm.entities.account.Accounts;
 import com.be.ssm.entities.store.Stores;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.store.StoreMapper;
 import com.be.ssm.repository.account.AccountRepository;
 import com.be.ssm.repository.store.StoresRepository;
@@ -67,6 +69,6 @@ public class StoreServiceImpl implements StoreService {
         log.info("Finding store by id {}", id);
 
         return repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.STORE_NOT_FOUND));
     }
 }

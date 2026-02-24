@@ -6,6 +6,8 @@ import com.be.ssm.dto.request.product.CategoryCreateRequest;
 import com.be.ssm.dto.request.product.CategoryUpdateRequest;
 import com.be.ssm.dto.response.product.CategoriesResponse;
 import com.be.ssm.entities.product.Categories;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.product.CategoriesMapper;
 import com.be.ssm.repository.product.CategoriesRepository;
 import com.be.ssm.service.product.CategoriesService;
@@ -51,6 +53,6 @@ public class CategoriesServiceImpl implements CategoriesService {
 
     private Categories findById(Integer id) {
         return repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.CATEGORIES_NOT_FOUND));
     }
 }

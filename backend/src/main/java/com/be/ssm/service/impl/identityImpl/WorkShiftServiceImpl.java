@@ -5,6 +5,8 @@ import com.be.ssm.dto.request.identity.WorkShiftUpdateRequest;
 import com.be.ssm.dto.response.identity.WorkShiftResponse;
 import com.be.ssm.entities.identity.WorkShifts;
 import com.be.ssm.entities.store.Stores;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.identity.WorkShiftMapper;
 import com.be.ssm.repository.identity.WorkShiftsRepository;
 import com.be.ssm.repository.store.StoresRepository;
@@ -56,6 +58,6 @@ public class WorkShiftServiceImpl implements WorkShiftService {
         log.info("Finding work shift by id {}", id);
 
         return repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.WORK_SHIFT_NOT_FOUND));
     }
 }

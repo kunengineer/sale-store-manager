@@ -5,6 +5,8 @@ import com.be.ssm.dto.request.identity.RoleCreateRequest;
 import com.be.ssm.dto.request.identity.RoleUpdateRequest;
 import com.be.ssm.dto.response.identity.RoleResponse;
 import com.be.ssm.entities.identity.Roles;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.identity.RoleMapper;
 import com.be.ssm.repository.identity.RolesRepository;
 import com.be.ssm.service.identity.RoleService;
@@ -51,6 +53,6 @@ public class RoleServiceImpl implements RoleService {
         log.info("Finding role by id {}", id);
 
         return repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.ROLE_NOT_FOUND));
     }
 }

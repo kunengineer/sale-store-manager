@@ -7,6 +7,8 @@ import com.be.ssm.dto.request.product.ProductUpdateRequest;
 import com.be.ssm.dto.response.product.ProductResponse;
 import com.be.ssm.entities.product.Categories;
 import com.be.ssm.entities.product.Products;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.product.ProductMapper;
 import com.be.ssm.repository.product.CategoriesRepository;
 import com.be.ssm.repository.product.ProductsRepository;
@@ -60,6 +62,6 @@ public class ProductServiceImpl implements ProductService {
 
     private Products findById(Integer id) {
         return repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.PRODUCT_NOT_FOUND));
     }
 }

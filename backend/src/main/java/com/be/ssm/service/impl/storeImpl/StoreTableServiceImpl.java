@@ -7,6 +7,8 @@ import com.be.ssm.dto.request.store.StoreTableUpdateRequest;
 import com.be.ssm.dto.response.store.StoreTableResponse;
 import com.be.ssm.entities.store.StoreTables;
 import com.be.ssm.entities.store.StoreZones;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.store.StoreTableMapper;
 import com.be.ssm.repository.store.StoreTablesRepository;
 import com.be.ssm.repository.store.StoreZonesRepository;
@@ -93,6 +95,6 @@ public class StoreTableServiceImpl implements StoreTableService {
         log.info("Finding store table by id: {}", tableId);
 
         return repository.findById(tableId)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.STORE_TABLE_NOT_FOUND));
     }
 }

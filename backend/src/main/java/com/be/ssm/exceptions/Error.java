@@ -88,6 +88,12 @@ public enum Error {
         // Store zone errors
         STORE_ZONE_NOT_FOUND(110007, "Store zone not found", HttpStatus.NOT_FOUND),
 
+        // Store product price errors
+        STORE_PRODUCT_PRICE_NOT_FOUND(110008, "Store product price not found", HttpStatus.NOT_FOUND),
+
+        // Store variant price errors
+        STORE_VARIANT_PRICE_NOT_FOUND(110009, "Store variant price not found", HttpStatus.NOT_FOUND),
+
         // Business logic errors
         INSUFFICIENT_PRIVILEGES(34001, "Insufficient privileges to perform this action", HttpStatus.FORBIDDEN),
         OPERATION_NOT_PERMITTED(34002, "Operation not permitted in current state", HttpStatus.BAD_REQUEST),

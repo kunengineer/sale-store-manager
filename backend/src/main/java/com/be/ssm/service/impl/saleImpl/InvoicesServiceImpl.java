@@ -5,6 +5,8 @@ import com.be.ssm.dto.request.sale.InvoiceUpdateRequest;
 import com.be.ssm.dto.response.sale.InvoiceResponse;
 import com.be.ssm.entities.sales.Invoices;
 import com.be.ssm.entities.sales.Orders;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.sales.InvoicesMapper;
 import com.be.ssm.repository.sales.InvoicesRepository;
 import com.be.ssm.repository.sales.OrdersRepository;
@@ -57,13 +59,13 @@ public class InvoicesServiceImpl implements InvoicesService {
         log.info("Finding invoice by id {}", id);
 
         return repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.INVOICE_NOT_FOUND));
     }
 
     private Orders findOrderById(Integer id) {
         log.info("Finding orders by id {}", id);
 
         return ordersRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.ORDER_NOT_FOUND));
     }
 }

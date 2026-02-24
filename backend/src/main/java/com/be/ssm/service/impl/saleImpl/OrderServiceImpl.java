@@ -12,6 +12,8 @@ import com.be.ssm.entities.sales.Customers;
 import com.be.ssm.entities.sales.OrderItems;
 import com.be.ssm.entities.sales.Orders;
 import com.be.ssm.entities.store.StoreTables;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.helper.OrderTotalCalculator;
 import com.be.ssm.mapper.sales.OrderItemMapper;
 import com.be.ssm.mapper.sales.OrdersMapper;
@@ -109,28 +111,28 @@ public class OrderServiceImpl implements OrderService {
         log.info("Finding order by id {}", id);
 
         return repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.ORDER_ITEM_NOT_FOUND));
     }
 
     private ProductVariants findProductVariantById(Integer id) {
         log.info("Finding product variant by id {}", id);
 
         return productVariantsRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.PRODUCT_VARIANT_NOT_FOUND));
     }
 
     private StoreTables findStoreTableById(Integer id) {
         log.info("Finding store table by id {}", id);
 
         return storeTablesRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.STORE_TABLE_NOT_FOUND));
     }
 
     private Customers findCustomerById(Integer id) {
         log.info("Finding customers by id {}", id);
 
         return customersRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.CUSTOMER_NOT_FOUND));
     }
 
     private  Employees findEmployeeById(Integer id) {

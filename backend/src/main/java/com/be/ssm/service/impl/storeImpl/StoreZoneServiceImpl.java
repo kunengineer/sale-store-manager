@@ -7,6 +7,8 @@ import com.be.ssm.dto.request.store.StoreZonesUpdateRequest;
 import com.be.ssm.dto.response.store.StoreZoneResponse;
 import com.be.ssm.entities.store.StoreZones;
 import com.be.ssm.entities.store.Stores;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.store.StoreZoneMapper;
 import com.be.ssm.repository.store.StoreZonesRepository;
 import com.be.ssm.repository.store.StoresRepository;
@@ -74,6 +76,6 @@ public class StoreZoneServiceImpl implements StoreZoneService {
         log.info("Finding store zone by id {}", id);
 
         return repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.STORE_ZONE_NOT_FOUND));
     }
 }

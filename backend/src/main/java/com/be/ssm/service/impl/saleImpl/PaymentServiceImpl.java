@@ -5,6 +5,8 @@ import com.be.ssm.dto.request.sale.PaymentUpdateRequest;
 import com.be.ssm.dto.response.sale.PaymentResponse;
 import com.be.ssm.entities.sales.Invoices;
 import com.be.ssm.entities.sales.Payments;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.sales.PaymentMapper;
 import com.be.ssm.repository.sales.InvoicesRepository;
 import com.be.ssm.repository.sales.PaymentsRepository;
@@ -57,13 +59,13 @@ public class PaymentServiceImpl implements PaymentService {
         log.info("Finding payment by id {}", id);
 
         return repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.PAYMENT_NOT_FOUND));
     }
 
     private Invoices findInvoiceById(Integer id) {
         log.info("Finding order by id {}", id);
 
         return invoicesRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.INVOICE_NOT_FOUND));
     }
 }

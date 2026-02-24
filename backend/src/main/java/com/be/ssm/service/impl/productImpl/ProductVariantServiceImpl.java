@@ -5,6 +5,8 @@ import com.be.ssm.dto.request.product.ProductVariantUpdateRequest;
 import com.be.ssm.dto.response.product.ProductVariantResponse;
 import com.be.ssm.entities.product.ProductVariants;
 import com.be.ssm.entities.product.Products;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.product.ProductVariantMapper;
 import com.be.ssm.repository.product.ProductVariantsRepository;
 import com.be.ssm.repository.product.ProductsRepository;
@@ -48,6 +50,6 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
     private ProductVariants findById(Integer id) {
         return repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.PRODUCT_VARIANT_NOT_FOUND));
     }
 }

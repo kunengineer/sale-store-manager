@@ -7,6 +7,8 @@ import com.be.ssm.dto.request.account.FormLogin;
 import com.be.ssm.dto.response.account.AccountResponse;
 import com.be.ssm.dto.response.account.AuthenticationResponse;
 import com.be.ssm.entities.account.Accounts;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.account.AccountMapper;
 import com.be.ssm.repository.account.AccountRepository;
 import com.be.ssm.service.account.AccountService;
@@ -59,14 +61,14 @@ public class AccountServiceImpl implements AccountService {
     public AuthenticationResponse signIn(FormLogin formLogin) {
         log.info("Sign in account");
         Accounts account = repository.findByUsername(formLogin.getUsername())
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.ACCOUNT_NOT_FOUND));
 
         if (!account.isAccountNonLocked()) {
             throw new CustomException(Error.ACCOUNT_LOCKED);
         }
 
         if (!passwordEncoder.matches(formLogin.getPassword(), account.getPassword())) {
-            throw new RuntimeException();
+            throw new CustomException(Error.ACCOUNT_INVALID_PASSWORD);
         }
 
         try {
@@ -86,6 +88,6 @@ public class AccountServiceImpl implements AccountService {
         log.info("Finding account by id {}", id);
 
         return repository.findById(id)
-                .orElseThrow();
+                .orElseThrow(()-> new CustomException(Error.ACCOUNT_NOT_FOUND));
     }
 }
