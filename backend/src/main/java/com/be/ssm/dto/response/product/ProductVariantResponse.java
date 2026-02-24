@@ -1,5 +1,6 @@
 package com.be.ssm.dto.response.product;
 
+import com.be.ssm.enums.product.VariantType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,6 +12,7 @@ public class ProductVariantResponse {
     private Integer variantId;
     private Integer productId;
     private String variantName;
+    private VariantType variantType;
     private String sku;
     private String barcode;
     private String attributes;

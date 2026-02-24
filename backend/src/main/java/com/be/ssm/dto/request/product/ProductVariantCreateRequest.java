@@ -1,5 +1,6 @@
 package com.be.ssm.dto.request.product;
 
+import com.be.ssm.enums.product.VariantType;
 import lombok.Builder;
 import lombok.Data;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,6 +19,10 @@ public class ProductVariantCreateRequest {
     @NotBlank(message = "Variant name must not be blank")
     @Schema(example = "Size M")
     private String variantName;
+
+    @NotBlank(message = "Variant type must not be blank")
+    @Schema(example = "Size")
+    private VariantType variantType;
 
     @NotBlank(message = "SKU must not be blank")
     @Schema(example = "CF001-M")

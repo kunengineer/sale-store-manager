@@ -1,5 +1,6 @@
 package com.be.ssm.entities.product;
 
+import com.be.ssm.enums.product.VariantType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,10 @@ public class ProductVariants {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Products product;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "variant_type", nullable = false, length = 50)
+    private VariantType variantType;
 
     @Column(name = "variant_name", nullable = false, length = 100)
     private String variantName;
