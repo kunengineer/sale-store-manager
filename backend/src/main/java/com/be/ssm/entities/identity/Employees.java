@@ -1,5 +1,6 @@
 package com.be.ssm.entities.identity;
 
+import com.be.ssm.entities.account.Accounts;
 import com.be.ssm.entities.store.Stores;
 import com.be.ssm.enums.identity.SalaryType;
 import jakarta.persistence.*;
@@ -67,6 +68,13 @@ public class Employees {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @OneToOne(
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
+    )
+    @JoinColumn(name = "account_id")
+    private Accounts account;
 
     @PrePersist
     public void prePersist() {

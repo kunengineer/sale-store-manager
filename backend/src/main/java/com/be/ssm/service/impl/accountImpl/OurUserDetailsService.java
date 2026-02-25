@@ -1,8 +1,13 @@
 package com.be.ssm.service.impl.accountImpl;
 
+import com.be.ssm.entities.account.Accounts;
+import com.be.ssm.exceptions.CustomException;
+import com.be.ssm.exceptions.Error;
 import com.be.ssm.repository.account.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,4 +36,17 @@ public class OurUserDetailsService implements UserDetailsService {
         return accountRepository.findByUsername(username)
                 .orElseThrow(()-> new UsernameNotFoundException("Account not found with username: " + username));
     }
+
+    public Accounts getAccountAuth() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new CustomException(Error.UNAUTHORIZED);
+        }
+
+        Accounts account = (Accounts) authentication.getPrincipal();
+
+        return account;
+    }
+
+
 }
