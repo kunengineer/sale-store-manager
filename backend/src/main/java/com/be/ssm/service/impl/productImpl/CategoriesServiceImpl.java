@@ -30,7 +30,7 @@ public class CategoriesServiceImpl implements CategoriesService {
 
     @Override
     public CategoriesResponse create(CategoryCreateRequest request) {
-        if (repository.existsByName(request.getCategoryName())) {
+        if (repository.existsByCategoryName(request.getCategoryName())) {
             // Handle duplicate category name case, e.g., throw an exception or return an error response
         }
         Categories category = mapper.toCategoriesEntity(request);

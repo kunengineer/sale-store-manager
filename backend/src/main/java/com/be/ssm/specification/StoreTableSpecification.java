@@ -57,8 +57,8 @@ public class StoreTableSpecification {
             // =========================
             // isActive → map theo status nếu có quy ước
             // =========================
-            if (filter.getIsActive() != null) {
-                    predicates.add(cb.notEqual(root.get("status"), filter.getIsActive()));
+            if (filter.getStatus() != null) {
+                    predicates.add(cb.notEqual(root.get("status"), filter.getStatus()));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

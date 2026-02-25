@@ -26,36 +26,6 @@ public class OrderItemController {
     private final OrderItemService orderItemService;
 
     // =========================
-    // CREATE ORDER ITEM
-    // =========================
-    @PostMapping
-    @Operation(
-            summary = "Create new order item",
-            description = "Create a new order item for an order",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Order item created successfully",
-                            content = @Content(schema = @Schema(implementation = OrderItemResponse.class))),
-                    @ApiResponse(responseCode = "400", description = "Invalid input data"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error")
-            }
-    )
-    public ResponseEntity<APIResponse<OrderItemResponse>> createOrderItem(
-            @RequestBody @Valid OrderItemCreateRequest request,
-            HttpServletRequest httpRequest) {
-
-        OrderItemResponse response = orderItemService.create(request);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new APIResponse<>(
-                        true,
-                        "Order item created successfully",
-                        response,
-                        null,
-                        httpRequest.getRequestURI()
-                ));
-    }
-
-    // =========================
     // GET ORDER ITEM BY ID
     // =========================
     @GetMapping("/{id}")

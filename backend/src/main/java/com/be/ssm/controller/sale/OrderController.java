@@ -4,10 +4,12 @@ import com.be.ssm.dto.common.APIResponse;
 import com.be.ssm.dto.common.PageDTO;
 import com.be.ssm.dto.filter.OrderFilter;
 import com.be.ssm.dto.request.sale.OrderCreateRequest;
+import com.be.ssm.dto.request.sale.OrderItemCreateRequest;
 import com.be.ssm.dto.request.sale.OrderUpdateRequest;
 import com.be.ssm.dto.response.sale.OrderResponse;
 import com.be.ssm.service.sale.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -119,6 +123,39 @@ public class OrderController {
                 ));
     }
 
+    @PostMapping("/{orderId}/items")
+    @Operation(
+            summary = "Add items to order",
+            description = "Add new items into an existing order",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Items added successfully",
+                            content = @Content(schema = @Schema(implementation = OrderResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data"),
+                    @ApiResponse(responseCode = "404", description = "Order not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<APIResponse<OrderResponse>> addItems(
+            @Parameter(description = "Order ID", required = true)
+            @PathVariable Integer orderId,
+
+            @RequestBody @Valid List<OrderItemCreateRequest> newItems,
+
+            HttpServletRequest httpRequest
+    ) {
+
+        OrderResponse response = orderService.addItems(orderId, newItems);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Items added to order successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
+    }
 
     @GetMapping
     @Operation(

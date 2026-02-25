@@ -88,6 +88,21 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrderResponse addItems(Integer orderId, List<OrderItemCreateRequest> newItems) {
+        Orders order = findById(orderId);
+
+        Integer storeId = order.getStoreTables().getZone().getStore().getStoreId();
+
+        List<OrderItems> itemsToAdd = orderItemService.buildItems(newItems, order, storeId);
+
+        order.getOrderItems().addAll(itemsToAdd);
+
+        orderTotalCalculator.recalculateFromItems(order);
+
+        return mapper.toOrderResponse(repository.save(order));
+    }
+
+    @Override
     public OrderResponse update(OrderUpdateRequest request, Integer id) {
         log.info("Update order");
 
