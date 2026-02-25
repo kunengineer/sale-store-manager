@@ -1,5 +1,6 @@
 package com.be.ssm.dto.request.identity;
 
+import com.be.ssm.dto.request.account.AccountCreateRequest;
 import com.be.ssm.enums.identity.SalaryType;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
@@ -30,7 +31,7 @@ public class EmployeeCreateRequest {
     @Schema(example = "employee@gmail.com")
     private String email;
 
-    @Schema(example = "1999-05-20T00:00:00")
+    @Schema(example = "2000-05-20T00:00:00")
     private LocalDateTime dob;
 
     @NotNull
@@ -64,4 +65,9 @@ public class EmployeeCreateRequest {
     @NotNull
     @Schema(example = "1")
     private Integer workShiftId;
+
+    @NotNull
+    @Schema(example = "1")
+    private AccountCreateRequest accountCreateRequest;
+
 }

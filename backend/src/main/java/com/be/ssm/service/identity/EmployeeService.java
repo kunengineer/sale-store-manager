@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 public interface EmployeeService {
     EmployeeResponse getById(Integer id);
 
+    EmployeeResponse getCurrentEmployee();
+
     EmployeeResponse create(EmployeeCreateRequest request);
 
     EmployeeResponse update(EmployeeUpdateRequest request, Integer employeeId);
