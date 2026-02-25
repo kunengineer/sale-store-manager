@@ -3,6 +3,7 @@ package com.be.ssm.service.impl.saleImpl;
 import com.be.ssm.dto.common.PageDTO;
 import com.be.ssm.dto.filter.OrderFilter;
 import com.be.ssm.dto.request.sale.OrderCreateRequest;
+import com.be.ssm.dto.request.sale.OrderItemCreateRequest;
 import com.be.ssm.dto.request.sale.OrderUpdateRequest;
 import com.be.ssm.dto.response.sale.OrderItemResponse;
 import com.be.ssm.dto.response.sale.OrderResponse;
@@ -11,7 +12,9 @@ import com.be.ssm.entities.product.ProductVariants;
 import com.be.ssm.entities.sales.Customers;
 import com.be.ssm.entities.sales.OrderItems;
 import com.be.ssm.entities.sales.Orders;
+import com.be.ssm.entities.store.StoreProductPrice;
 import com.be.ssm.entities.store.StoreTables;
+import com.be.ssm.entities.store.StoreVariantPrice;
 import com.be.ssm.exceptions.CustomException;
 import com.be.ssm.exceptions.Error;
 import com.be.ssm.helper.OrderTotalCalculator;
@@ -21,7 +24,9 @@ import com.be.ssm.repository.identity.EmployeesRepository;
 import com.be.ssm.repository.product.ProductVariantsRepository;
 import com.be.ssm.repository.sales.CustomersRepository;
 import com.be.ssm.repository.sales.OrdersRepository;
+import com.be.ssm.repository.store.StoreProductPriceRepository;
 import com.be.ssm.repository.store.StoreTablesRepository;
+import com.be.ssm.repository.store.StoreVariantPriceRepository;
 import com.be.ssm.service.sale.OrderItemService;
 import com.be.ssm.service.sale.OrderService;
 import com.be.ssm.specification.OrderSpecification;
@@ -32,6 +37,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -47,7 +53,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderTotalCalculator orderTotalCalculator;
 
     private final OrdersMapper mapper;
-    private final OrderItemMapper orderItemMapper;
+    private final OrderItemService orderItemService;
 
 
     @Override
@@ -70,13 +76,10 @@ public class OrderServiceImpl implements OrderService {
         // order.setEmployees();
         order.setCustomers(customer);
 
-        List<OrderItems> items = request.getItems().stream()
-                .map(item ->{
-                    OrderItems orderItems = orderItemMapper.toOrderItemEntity(item);
-                    orderItems.setProductVariants(findProductVariantById(item.getProductVariantId()));
-                    return orderItems;
-                })
-                .toList();
+        Integer storeId = order.getStoreTables().getZone().getStore().getStoreId();
+
+        List<OrderItems> items = orderItemService.buildItems(request.getItems(), order, storeId);
+
         order.setOrderItems(items);
 
         orderTotalCalculator.recalculateFromItems(order);
@@ -141,4 +144,6 @@ public class OrderServiceImpl implements OrderService {
         return employeesRepository.findById(id)
                 .orElseThrow();
     }
+
+
 }

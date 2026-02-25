@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -47,34 +48,25 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
-    public OrderItemResponse create(OrderItemCreateRequest request) {
-        log.info("Create new order item");
-        ProductVariants productVariants = findProductVariantById(request.getProductVariantId());
-        Orders order = findOrderById(request.getOrderId());
+    public List<OrderItems> buildItems(List<OrderItemCreateRequest> itemRequests, Orders order, Integer storeId) {
+        return itemRequests.stream()
+                .map(req -> buildOrderItem(order, storeId, req))
+                .toList();
+    }
 
-        Integer storeId = order.getStoreTables().getZone().getStore().getStoreId();
+    private OrderItems buildOrderItem(Orders order, Integer storeId, OrderItemCreateRequest request) {
+        ProductVariants variant = findProductVariantById(request.getProductVariantId());
 
-
-        BigDecimal unitPrice = resolveUnitPrice(storeId, productVariants);
+        BigDecimal unitPrice = resolveUnitPrice(storeId, variant);
         BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(request.getQuantity()));
 
+        OrderItems item = mapper.toOrderItemEntity(request);
+        item.setOrder(order);
+        item.setProductVariants(variant);
+        item.setUnitPrice(unitPrice);
+        item.setLineTotal(lineTotal);
 
-        OrderItems orderItem = mapper.toOrderItemEntity(request);
-        orderItem.setProductVariants(productVariants);
-        orderItem.setOrder(order);
-        orderItem.setUnitPrice(unitPrice);
-        orderItem.setLineTotal(lineTotal);
-
-        repository.save(orderItem);
-
-        orderTotalCalculator.recalculate(order);
-
-        Orders saved = ordersRepository.save(order);
-
-        OrderItems savedItem = saved.getOrderItems()
-                .getLast();
-
-        return mapper.toOrderItemResponse(savedItem);
+        return item;
     }
 
     @Override
@@ -157,4 +149,5 @@ public class OrderItemServiceImpl implements OrderItemService {
         // 5️⃣ fallback cuối
         return BigDecimal.ZERO;
     }
+
 }
