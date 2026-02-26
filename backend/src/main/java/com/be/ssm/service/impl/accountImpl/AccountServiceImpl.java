@@ -39,6 +39,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountResponse create(AccountCreateRequest request) {
         log.info("Create new account");
+        existsUserName(request.getUsername());
 
         Accounts account = mapper.toAccountEntity(request);
         account.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -63,7 +64,7 @@ public class AccountServiceImpl implements AccountService {
         Accounts account = repository.findByUsername(formLogin.getUsername())
                 .orElseThrow(()-> new CustomException(Error.ACCOUNT_NOT_FOUND));
 
-        if (!account.isAccountNonLocked()) {
+        if (account.isAccountNonLocked()) {
             throw new CustomException(Error.ACCOUNT_LOCKED);
         }
 
@@ -89,5 +90,11 @@ public class AccountServiceImpl implements AccountService {
 
         return repository.findById(id)
                 .orElseThrow(()-> new CustomException(Error.ACCOUNT_NOT_FOUND));
+    }
+
+    private void existsUserName(String username) {
+        if(repository.findByUsername(username).isPresent()) {
+            throw new CustomException(Error.ACCOUNT_ALREADY_EXISTS);
+        }
     }
 }

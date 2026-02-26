@@ -1,5 +1,6 @@
 package com.be.ssm.dto.response.account;
 
+import com.be.ssm.enums.account.AccountRole;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,6 +9,7 @@ import lombok.Data;
 public class AccountResponse {
     private Integer accountId;
     private String fullName;
-    private String phone;
-    private String email;
+    private String userName;
+    private String createdAt;
+    private AccountRole role;
 }

@@ -35,7 +35,7 @@ public class Accounts implements UserDetails {
     private String fullName;
 
     @Column(name = "is_active")
-    private Boolean isActive = true;
+    private Boolean isActive;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -51,6 +51,7 @@ public class Accounts implements UserDetails {
 
     @PrePersist
     public void prePersist() {
+        this.isActive = true;
         this.createdAt = LocalDateTime.now();
     }
 

@@ -13,9 +13,6 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class AccountUpdateRequest {
-    @Size(max = 50)
-    @Schema(example = "admin02")
-    private String username;
 
     @Size(min = 6, max = 100)
     @Schema(example = "newPassword123")
@@ -25,11 +22,4 @@ public class AccountUpdateRequest {
     @Schema(example = "Nguyen Van Updated")
     private String fullName;
 
-    @Pattern(regexp = "^(0|\\+84)[0-9]{9,10}$")
-    @Schema(example = "0988888888")
-    private String phone;
-
-    @Email
-    @Schema(example = "updated@gmail.com")
-    private String email;
 }
