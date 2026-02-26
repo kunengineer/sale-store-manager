@@ -137,10 +137,14 @@ public class DataInitializer implements CommandLineRunner {
     private void initEmployees() {
         if (employeesRepository.count() > 0) return;
 
-        Roles     ownerRole  = rolesRepository.findByRoleName("OWNER").orElseThrow();
-        Roles     managerRole= rolesRepository.findByRoleName("MANAGER").orElseThrow();
-        Stores    store1     = storesRepository.findByStoreCode("STR-001").orElseThrow();
-        WorkShifts morning   = workShiftsRepository.findByShiftName("Ca sáng").orElseThrow();
+        Roles ownerRole = rolesRepository.findByRoleName("OWNER")
+                .orElseThrow(() -> new RuntimeException("Role OWNER not found"));
+
+        Roles managerRole = rolesRepository.findByRoleName("MANAGER")
+                .orElseThrow(() -> new RuntimeException("Role MANAGER not found"));
+
+        Stores    store1     = storesRepository.findByStoreCode("STR-001")
+                .orElseThrow(() -> new RuntimeException("Store STR-001 not found"));
         Accounts  adminAcc   = accountsRepository.findByUsername("admin").orElseThrow();
         Accounts  managerAcc = accountsRepository.findByUsername("manager1").orElseThrow();
 
@@ -152,7 +156,6 @@ public class DataInitializer implements CommandLineRunner {
                         .email("an.nguyen@salestore.com")
                         .role(ownerRole)
                         .store(store1)
-                        .workShift(morning)
                         .account(adminAcc)
                         .salaryType(SalaryType.MONTHLY)
                         .baseSalary(BigDecimal.valueOf(15_000_000))
@@ -166,7 +169,6 @@ public class DataInitializer implements CommandLineRunner {
                         .email("binh.tran@salestore.com")
                         .role(managerRole)
                         .store(store1)
-                        .workShift(morning)
                         .account(managerAcc)
                         .salaryType(SalaryType.MONTHLY)
                         .baseSalary(BigDecimal.valueOf(12_000_000))

@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface StoresRepository extends JpaRepository<Stores, Integer> {
 
     Stores findStoresByManager(Accounts manager);
+
+    Optional<Stores> findByStoreCode(String storeCode);
 }
