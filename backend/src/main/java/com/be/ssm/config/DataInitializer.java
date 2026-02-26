@@ -46,9 +46,9 @@ public class DataInitializer implements CommandLineRunner {
 
         initRoles();
         initStores();
-        initWorkShifts();
+        //initWorkShifts();
         initAccounts();
-        initEmployees();
+        //initEmployees();
 
         log.info("=== Mock data initialized ===");
     }
@@ -60,10 +60,12 @@ public class DataInitializer implements CommandLineRunner {
             return;   // ✅ không insert 2 lần khi restart
         }
         rolesRepository.saveAll(List.of(
-                Roles.builder().roleName("OWNER").build(),
-                Roles.builder().roleName("MANAGER").build(),
-                Roles.builder().roleName("CASHIER").build(),
-                Roles.builder().roleName("WAREHOUSE").build()
+                Roles.builder().roleName("OWNER")
+                        .isSystem(true).build(),
+                Roles.builder().roleName("MANAGER")
+                        .isSystem(true).build(),
+                Roles.builder().roleName("CASHIER").isSystem(true).build(),
+                Roles.builder().roleName("WAREHOUSE").isSystem(true).build()
         ));
         log.info("Roles initialized");
     }
@@ -90,21 +92,6 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     // ── WorkShifts ────────────────────────────────────────────
-    private void initWorkShifts() {
-        if (workShiftsRepository.count() > 0) return;
-
-        workShiftsRepository.saveAll(List.of(
-                WorkShifts.builder()
-                        .startTime(LocalDateTime.now())
-                        .endTime(LocalDateTime.now())
-                        .build(),
-                WorkShifts.builder()
-                        .startTime(LocalDateTime.now())
-                        .endTime(LocalDateTime.now())
-                        .build()
-        ));
-        log.info("WorkShifts initialized");
-    }
 
     // ── Accounts ──────────────────────────────────────────────
     private void initAccounts() {
@@ -134,48 +121,48 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     // ── Employees ─────────────────────────────────────────────
-    private void initEmployees() {
-        if (employeesRepository.count() > 0) return;
-
-        Roles ownerRole = rolesRepository.findByRoleName("OWNER")
-                .orElseThrow(() -> new RuntimeException("Role OWNER not found"));
-
-        Roles managerRole = rolesRepository.findByRoleName("MANAGER")
-                .orElseThrow(() -> new RuntimeException("Role MANAGER not found"));
-
-        Stores    store1     = storesRepository.findByStoreCode("STR-001")
-                .orElseThrow(() -> new RuntimeException("Store STR-001 not found"));
-        Accounts  adminAcc   = accountsRepository.findByUsername("admin").orElseThrow();
-        Accounts  managerAcc = accountsRepository.findByUsername("manager1").orElseThrow();
-
-        employeesRepository.saveAll(List.of(
-                Employees.builder()
-                        .empCode("EMP-001")
-                        .fullName("Nguyễn Văn An")
-                        .phone("0901234567")
-                        .email("an.nguyen@salestore.com")
-                        .role(ownerRole)
-                        .store(store1)
-                        .account(adminAcc)
-                        .salaryType(SalaryType.MONTHLY)
-                        .baseSalary(BigDecimal.valueOf(15_000_000))
-                        .hireDate(LocalDateTime.now().minusYears(2))
-                        .isActive(true)
-                        .build(),
-                Employees.builder()
-                        .empCode("EMP-002")
-                        .fullName("Trần Thị Bình")
-                        .phone("0912345678")
-                        .email("binh.tran@salestore.com")
-                        .role(managerRole)
-                        .store(store1)
-                        .account(managerAcc)
-                        .salaryType(SalaryType.MONTHLY)
-                        .baseSalary(BigDecimal.valueOf(12_000_000))
-                        .hireDate(LocalDateTime.now().minusYears(1))
-                        .isActive(true)
-                        .build()
-        ));
-        log.info("Employees initialized");
-    }
+//    private void initEmployees() {
+//        if (employeesRepository.count() > 0) return;
+//
+//        Roles ownerRole = rolesRepository.findByRoleName("OWNER")
+//                .orElseThrow(() -> new RuntimeException("Role OWNER not found"));
+//
+//        Roles managerRole = rolesRepository.findByRoleName("MANAGER")
+//                .orElseThrow(() -> new RuntimeException("Role MANAGER not found"));
+//
+//        Stores    store1     = storesRepository.findByStoreCode("STR-001")
+//                .orElseThrow(() -> new RuntimeException("Store STR-001 not found"));
+//        Accounts  adminAcc   = accountsRepository.findByUsername("admin").orElseThrow();
+//        Accounts  managerAcc = accountsRepository.findByUsername("manager1").orElseThrow();
+//
+//        employeesRepository.saveAll(List.of(
+//                Employees.builder()
+//                        .empCode("EMP-001")
+//                        .fullName("Nguyễn Văn An")
+//                        .phone("0901234567")
+//                        .email("an.nguyen@salestore.com")
+//                        .role(ownerRole)
+//                        .store(store1)
+//                        .account(adminAcc)
+//                        .salaryType(SalaryType.MONTHLY)
+//                        .baseSalary(BigDecimal.valueOf(15_000_000))
+//                        .hireDate(LocalDateTime.now().minusYears(2))
+//                        .isActive(true)
+//                        .build(),
+//                Employees.builder()
+//                        .empCode("EMP-002")
+//                        .fullName("Trần Thị Bình")
+//                        .phone("0912345678")
+//                        .email("binh.tran@salestore.com")
+//                        .role(managerRole)
+//                        .store(store1)
+//                        .account(managerAcc)
+//                        .salaryType(SalaryType.MONTHLY)
+//                        .baseSalary(BigDecimal.valueOf(12_000_000))
+//                        .hireDate(LocalDateTime.now().minusYears(1))
+//                        .isActive(true)
+//                        .build()
+//        ));
+//        log.info("Employees initialized");
+//    }
 }
