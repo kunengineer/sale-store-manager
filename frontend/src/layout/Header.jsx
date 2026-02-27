@@ -82,7 +82,10 @@ export function Header() {
               <button
                 type="button"
                 className="block w-full px-3 py-1.5 text-left hover:bg-[var(--surface-2)]"
-                onClick={() => window.alert('Đăng xuất sẽ được nối với auth API.')}
+                onClick={() => {
+                  window.alert('Chức năng này chưa được triển khai. Nhưng vẫn sẽ chuyển đến trang đăng nhập nhé!')
+                  window.location.href = '/login'
+                }}
               >
                 Đăng xuất
               </button>
