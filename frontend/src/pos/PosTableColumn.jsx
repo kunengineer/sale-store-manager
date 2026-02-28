@@ -71,13 +71,7 @@ export function PosTableColumn() {
                         : table.status === 'reserved'
                           ? table.reservedAt
                           : null
-                    if (!src) return null
-                    const d = new Date(src)
-                    const hhmm = d.toLocaleTimeString('vi-VN', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })
-                    return table.status === 'using' ? `Vào ${hhmm}` : `Đặt ${hhmm}`
+
                   })()
                   return (
                     <button

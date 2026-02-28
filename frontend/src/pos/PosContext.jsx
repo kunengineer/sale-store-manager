@@ -1,39 +1,61 @@
 import { createContext, useContext, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
-import {
-  MOCK_AREAS,
-  MOCK_ORDERS_BY_TABLE,
-  MOCK_PRODUCTS,
-  MOCK_TABLES,
-} from '../data/mockPosData'
+import { MOCK_ORDERS_BY_TABLE, MOCK_PRODUCTS } from '../data/mockPosData'
 import { useStore } from '../store/StoreContext'
+import { getStoreLayout } from '../data/services/storeZoneApi'
+import { useQuery } from '@tanstack/react-query'
 
 const PosContext = createContext(null)
 
 export function PosProvider({ children }) {
   const { currentStoreId } = useStore()
 
-  const areasForStore = useMemo(
-    () => MOCK_AREAS.filter((a) => a.storeId === currentStoreId),
-    [currentStoreId],
-  )
+  const { data: storeLayout } = useQuery({
+    queryKey: ['storeLayout', currentStoreId],
+    queryFn: () => getStoreLayout(currentStoreId),
+    enabled: !!currentStoreId,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  })
 
-  const [activeAreaId, setActiveAreaId] = useState(
-    areasForStore[0]?.id ?? MOCK_AREAS[0]?.id,
-  )
+  // ====== MAP AREAS ======
+  const areas = useMemo(() => {
+    const zones = storeLayout?.data ?? []
+    return zones.map((z) => ({
+      id: z.zoneId,
+      name: z.zoneName,
+    }))
+  }, [storeLayout])
+
+  // ====== MAP ALL TABLES ======
+  const allTables = useMemo(() => {
+    const zones = storeLayout?.data ?? []
+    return zones.flatMap((z) =>
+      (z.tables ?? []).map((t) => ({
+        id: t.tableId,
+        name: t.tableName,
+        status: t.status, 
+        areaId: z.zoneId,
+        openedAt: t.openedAt,
+        reservedAt: t.reservedAt,
+        guests: t.guests,
+      })),
+    )
+  }, [storeLayout])
+
+  // ====== ACTIVE AREA ======
+  const [activeAreaId, setActiveAreaId] = useState(null)
+
+  // ====== SELECT TABLE ======
   const [selectedTableId, setSelectedTableId] = useState(null)
   const [orderItems, setOrderItems] = useState([])
 
-  const tablesForArea = useMemo(
-    () => MOCK_TABLES.filter((t) => t.areaId === activeAreaId),
-    [activeAreaId],
-  )
-
   const selectedTable = useMemo(
-    () => MOCK_TABLES.find((t) => t.id === selectedTableId) ?? null,
-    [selectedTableId],
+    () => allTables.find((t) => t.id === selectedTableId) ?? null,
+    [selectedTableId, allTables],
   )
 
+  // ====== MOCK ORDER (temporary) ======
   const hydrateOrderFromMock = (tableId) => {
     const mock = MOCK_ORDERS_BY_TABLE[tableId] ?? []
     const hydrated = mock.map((item) => {
@@ -52,9 +74,11 @@ export function PosProvider({ children }) {
     hydrateOrderFromMock(tableId)
   }
 
+  // ====== ORDER ACTIONS ======
   const addProductToOrder = (productId) => {
     const product = MOCK_PRODUCTS.find((p) => p.id === productId)
     if (!product) return
+
     setOrderItems((prev) => {
       const existing = prev.find((i) => i.productId === productId)
       if (existing) {
@@ -84,12 +108,15 @@ export function PosProvider({ children }) {
     )
   }
 
-  const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.qty, 0)
+  const subtotal = orderItems.reduce(
+    (sum, item) => sum + item.price * item.qty,
+    0,
+  )
 
+  // ====== CONTEXT VALUE ======
   const value = {
-    areas: areasForStore,
-    tables: tablesForArea,
-    allTables: MOCK_TABLES,
+    areas,            
+    tables: allTables,        // tất cả bàn đã map từ API
     activeAreaId,
     setActiveAreaId,
     selectedTable,
@@ -113,4 +140,3 @@ export function usePos() {
   if (!ctx) throw new Error('usePos must be used within PosProvider')
   return ctx
 }
-

@@ -236,6 +236,28 @@ export function PosOrderColumn() {
     [customerPaid, total],
   )
 
+  const tableTimeText = useMemo(() => {
+    if (!selectedTable) return null
+  
+    const src =
+      selectedTable.status === 'using'
+        ? selectedTable.openedAt
+        : selectedTable.status === 'reserved'
+          ? selectedTable.reservedAt
+          : null
+  
+    if (!src) return null
+  
+    const d = new Date(src)
+    const date = d.toLocaleDateString('vi-VN') // dd/MM/yyyy
+    const time = d.toLocaleTimeString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  
+    return `${date} · ${time}`
+  }, [selectedTable])
+
   return (
     <>
       <section
@@ -245,29 +267,39 @@ export function PosOrderColumn() {
             : 'border-[var(--border)] bg-[var(--surface-solid)]'
         }`}
       >
-        <div className="flex items-center justify-between border-b border-[var(--border)] px-3 py-2">
-          <div>
+        <div className="flex items-start justify-between border-b border-[var(--border)] px-3 py-2">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-[var(--text)]">
               {selectedTable ? `Bàn ${selectedTable.name}` : 'Chưa chọn bàn'}
             </p>
-            <p className="text-xs text-emerald-600">
-              {selectedTable
-                ? selectedTable.status === 'using'
-                  ? `Đang phục vụ · ${selectedTable.guests ?? 0} khách`
-                  : selectedTable.status === 'reserved'
-                    ? 'Đã đặt chỗ'
-                    : 'Trống'
-                : 'Chọn bàn để tạo hóa đơn'}
-            </p>
+
+            {tableTimeText && (
+              <span className="inline-block rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">
+                {selectedTable.status === 'using' ? 'Mở lúc' : 'Đặt lúc'} {tableTimeText}
+              </span>
+            )}
           </div>
-          <button
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-2 py-1 text-[11px] text-[var(--text)]"
-            type="button"
-            onClick={() => setOpenChangeTable(true)}
-          >
-            Đổi bàn
-          </button>
+
+          <p className="text-xs text-emerald-600">
+            {selectedTable
+              ? selectedTable.status === 'using'
+                ? `Đang phục vụ · ${selectedTable.guests ?? 0} khách`
+                : selectedTable.status === 'reserved'
+                  ? `Đã đặt chỗ`
+                  : 'Trống'
+              : 'Chọn bàn để tạo hóa đơn'}
+          </p>
         </div>
+
+        <button
+          className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1.5 text-[11px] text-[var(--text)] hover:border-emerald-500 transition"
+          type="button"
+          onClick={() => setOpenChangeTable(true)}
+        >
+          Đổi bàn
+        </button>
+      </div>
 
         <div className="flex-1 divide-y divide-[var(--border)] overflow-auto">
           {orderItems.map((item) => (

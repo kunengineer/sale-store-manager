@@ -20,7 +20,7 @@ export function LoginPage() {
     }
 
     setLoading(true)
-    toast.info('Đang đăng nhập...', 'Vui lòng chờ trong giây lát!')
+    // toast.info('Đang đăng nhập...', 'Vui lòng chờ trong giây lát!')
 
     try {
       // TODO: truyền role vào nếu BE cần phân biệt endpoint
@@ -28,6 +28,11 @@ export function LoginPage() {
       console.log('Data:', authData)
 
       if (authData.success) {
+        const { token, refreshToken, role: userRole } = authData.data
+
+        localStorage.setItem('accessToken', token)
+        localStorage.setItem('refreshToken', refreshToken)
+        localStorage.setItem('role', userRole)
         if (role === 'ADMIN') {
           // TODO: xử lý luồng ADMIN
           // - check hasStore -> navigate store setup nếu chưa có
