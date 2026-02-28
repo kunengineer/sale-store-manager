@@ -8,9 +8,11 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface AccountMapper {
+
     AccountResponse toAccountResponse(Accounts accounts);
 
-    @Mapping(source = "role", target = "role")
+    //@Mapping(source = "role", target = "role")
+    //@Mapping(source = "email", target = "email")
     Accounts toAccountEntity(AccountCreateRequest request);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

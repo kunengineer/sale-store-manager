@@ -10,17 +10,20 @@ import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.store.StoreMapper;
 import com.be.ssm.repository.account.AccountRepository;
 import com.be.ssm.repository.store.StoresRepository;
+import com.be.ssm.service.impl.accountImpl.OurUserDetailsService;
 import com.be.ssm.service.store.StoreService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class StoreServiceImpl implements StoreService {
+    private final OurUserDetailsService userDetailsService;
 
     private final StoresRepository repository;
     private final AccountRepository accountRepository;
@@ -34,9 +37,9 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public StoreResponse getByManager() {
+    public List<StoreResponse> getByManager() {
 
-        Accounts manager = new Accounts();
+        Accounts manager = userDetailsService.getAccountAuth();
         Stores store = repository.findStoresByManager(manager);
 
         return mapper.toStoreResponse(store);
@@ -50,6 +53,8 @@ public class StoreServiceImpl implements StoreService {
 
         Stores stores = mapper.toStoreEntity(request);
         stores.setManager(account);
+
+        log.info("Create new store {}", stores);
 
         return mapper.toStoreResponse(repository.save(stores));
     }

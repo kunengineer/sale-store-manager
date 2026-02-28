@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/accounts")
 @Tag(name = "Account Management", description = "APIs for managing system accounts")
+@Slf4j
 public class AccountController {
 
     private final AccountService accountService;
@@ -52,6 +54,7 @@ public class AccountController {
     public ResponseEntity<APIResponse<AccountResponse>> create(
             @RequestBody @Valid AccountCreateRequest request,
             HttpServletRequest httpRequest) {
+        log.info("Received request to create account with details {}", request);
 
         AccountResponse response = accountService.create(request);
 

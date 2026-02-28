@@ -17,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/stores")
@@ -105,5 +107,32 @@ public class StoreController {
                         null,
                         httpRequest.getRequestURI()
                 ));
+    }
+
+    @GetMapping("/current")
+    @Operation(
+            summary = "Get stores by manager",
+            description = "Retrieve all stores managed by a specific manager",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Stores retrieved successfully",
+                            content = @Content(schema = @Schema(implementation = StoreResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Manager not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<APIResponse<List<StoreResponse>>> getStoresByManager(
+            HttpServletRequest httpRequest) {
+
+        List<StoreResponse> response = storeService.getByManager();
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Stores retrieved successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
     }
 }

@@ -38,7 +38,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AccountResponse create(AccountCreateRequest request) {
-        log.info("Create new account");
+        log.info("Create new account: {}", request);
         existsUserNameOrEmail(request.getUsername(), request.getEmail());
 
         Accounts account = mapper.toAccountEntity(request);
