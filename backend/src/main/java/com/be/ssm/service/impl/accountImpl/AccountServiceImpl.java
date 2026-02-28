@@ -39,7 +39,7 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountResponse create(AccountCreateRequest request) {
         log.info("Create new account");
-        existsUserName(request.getUsername());
+        existsUserNameOrEmail(request.getUsername(), request.getEmail());
 
         Accounts account = mapper.toAccountEntity(request);
         account.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -60,7 +60,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public AuthenticationResponse signIn(FormLogin formLogin) {
-        log.info("Sign in account");
+        log.info("Sign in account: {}", formLogin);
         Accounts account = repository.findByUsername(formLogin.getUsername())
                 .orElseThrow(()-> new CustomException(Error.ACCOUNT_NOT_FOUND));
 
@@ -92,9 +92,13 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(()-> new CustomException(Error.ACCOUNT_NOT_FOUND));
     }
 
-    private void existsUserName(String username) {
-        if(repository.findByUsername(username).isPresent()) {
-            throw new CustomException(Error.ACCOUNT_ALREADY_EXISTS);
+    private void existsUserNameOrEmail(String username, String email) {
+        if(repository.existsByUsername(username)) {
+            throw new CustomException(Error.ACCOUNT_USERNAME_EXISTS);
+        }
+
+        if(repository.existsByEmail(email)) {
+            throw new CustomException(Error.ACCOUNT_EMAIL_EXISTS);
         }
     }
 }

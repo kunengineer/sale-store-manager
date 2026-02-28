@@ -34,6 +34,9 @@ public class Accounts implements UserDetails {
     @Column(name = "full_name", nullable = false, length = 150)
     private String fullName;
 
+    @Column(name = "email", nullable = false)
+    private String email;
+
     @Column(name = "is_active")
     private Boolean isActive;
 

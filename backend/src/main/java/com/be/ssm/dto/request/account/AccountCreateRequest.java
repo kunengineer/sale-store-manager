@@ -24,6 +24,8 @@ public class AccountCreateRequest {
     @Schema(example = "password123")
     private String password;
 
+    private String email;
+
     @Size(max = 150)
     @Schema(example = "Nguyen Van Updated")
     private String fullName;

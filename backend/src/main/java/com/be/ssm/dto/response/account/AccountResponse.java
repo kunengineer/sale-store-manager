@@ -10,6 +10,7 @@ public class AccountResponse {
     private Integer accountId;
     private String fullName;
     private String userName;
+    private String email;
     private String createdAt;
     private AccountRole role;
 }

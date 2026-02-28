@@ -27,6 +27,8 @@ public enum Error {
         // Account-related errors
         ACCOUNT_NOT_FOUND(1001, "Account not found", HttpStatus.NOT_FOUND),
         ACCOUNT_ALREADY_EXISTS(1002, "Account already exists", HttpStatus.CONFLICT),
+        ACCOUNT_USERNAME_EXISTS(1003, "Account username already exists", HttpStatus.CONFLICT),
+        ACCOUNT_EMAIL_EXISTS(1004, "Account email already exists", HttpStatus.CONFLICT),
         ACCOUNT_UNABLE_TO_SAVE(1003, "Unable to save account", HttpStatus.INTERNAL_SERVER_ERROR),
         ACCOUNT_UNABLE_TO_UPDATE(1004, "Unable to update account", HttpStatus.INTERNAL_SERVER_ERROR),
         ACCOUNT_UNABLE_TO_DELETE(1005, "Unable to delete account", HttpStatus.INTERNAL_SERVER_ERROR),
