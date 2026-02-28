@@ -3,15 +3,16 @@ package com.be.ssm.mapper.store;
 import com.be.ssm.dto.common.PageDTO;
 import com.be.ssm.dto.request.store.StoreZonesCreateRequest;
 import com.be.ssm.dto.request.store.StoreZonesUpdateRequest;
+import com.be.ssm.dto.response.store.StoreZoneLayoutResponse;
 import com.be.ssm.dto.response.store.StoreZoneResponse;
 import com.be.ssm.entities.store.StoreZones;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 import org.springframework.data.domain.Page;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {StoreTableMapper.class}
+)
 public interface StoreZoneMapper {
     StoreZoneResponse toStoreZoneResponse(StoreZones storeZones);
 
@@ -35,4 +36,9 @@ public interface StoreZoneMapper {
                 .build();
     }
 
+    @Mapping(target = "zoneId", source = "zoneId")
+    @Mapping(target = "zoneName", source = "zoneName")
+    @Mapping(target = "zoneType", source = "zoneType")
+    @Mapping(target = "tables", source = "tables")
+    StoreZoneLayoutResponse toStoreZoneLayoutResponse(StoreZones storeZones);
 }

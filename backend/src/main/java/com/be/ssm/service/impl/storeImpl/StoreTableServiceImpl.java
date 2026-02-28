@@ -2,14 +2,19 @@ package com.be.ssm.service.impl.storeImpl;
 
 import com.be.ssm.dto.common.PageDTO;
 import com.be.ssm.dto.filter.StoreTableFilter;
+import com.be.ssm.dto.request.store.MergeTablesRequest;
+import com.be.ssm.dto.request.store.MoveTableRequest;
 import com.be.ssm.dto.request.store.StoreTableCreateRequest;
 import com.be.ssm.dto.request.store.StoreTableUpdateRequest;
 import com.be.ssm.dto.response.store.StoreTableResponse;
+import com.be.ssm.dto.response.store.StoreZoneLayoutResponse;
 import com.be.ssm.entities.store.StoreTables;
 import com.be.ssm.entities.store.StoreZones;
+import com.be.ssm.enums.store.TableStatus;
 import com.be.ssm.exceptions.CustomException;
 import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.store.StoreTableMapper;
+import com.be.ssm.mapper.store.StoreZoneMapper;
 import com.be.ssm.repository.store.StoreTablesRepository;
 import com.be.ssm.repository.store.StoreZonesRepository;
 import com.be.ssm.service.store.StoreTableService;
@@ -21,6 +26,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -76,6 +83,45 @@ public class StoreTableServiceImpl implements StoreTableService {
         Pageable pageable = PageRequest.of(page -1, size);
 
         return mapper.toPageDTO(repository.findAll(spec, pageable));
+    }
+
+    @Override
+    public StoreTableResponse moveTable(Integer tableId, MoveTableRequest request) {
+        log.info("Moving table with id {} to zone {}", tableId, request.getTargetZoneId());
+
+        StoreTables table = findById(tableId);
+
+        StoreZones targetZone = storeZonesRepository.findById(request.getTargetZoneId())
+                .orElseThrow();
+        isDuplicateTableCode(targetZone.getZoneId(), table.getTableCode());
+        table.setZone(targetZone);
+
+        return mapper.toStoreTableResponse(repository.save(table));
+    }
+
+    @Override
+    public void mergeTables(MergeTablesRequest request) {
+        StoreTables source = findById(request.getSourceTableId());
+        StoreTables target = findById(request.getTargetTableId());
+
+        source.setStatus(TableStatus.MERGED);
+        source.setMergedIntoTableId(target.getTableId());
+
+        repository.save(source);
+    }
+
+    @Override
+    public void unmergeTable(Integer tableId) {
+        StoreTables table = findById(tableId);
+
+        if (table.getStatus() != TableStatus.MERGED) {
+            throw new CustomException(Error.TABLE_NOT_MERGED);
+        }
+
+        table.setStatus(TableStatus.AVAILABLE);
+        table.setMergedIntoTableId(null);
+
+        repository.save(table);
     }
 
     private void isDuplicateTableCode(Integer zoneId, String tableCode) {

@@ -89,6 +89,7 @@ public enum Error {
 
         // Store zone errors
         STORE_ZONE_NOT_FOUND(110007, "Store zone not found", HttpStatus.NOT_FOUND),
+        TABLE_NOT_MERGED(110007, "Table is not merged", HttpStatus.BAD_REQUEST),
 
         // Store product price errors
         STORE_PRODUCT_PRICE_NOT_FOUND(110008, "Store product price not found", HttpStatus.NOT_FOUND),

@@ -7,7 +7,8 @@ public enum TableStatus {
     AVAILABLE("Bàn trống"),
     OCCUPIED("Đang sử dụng"),
     RESERVED("Đã đặt trước"),
-    MAINTENANCE("Đang bảo trì");
+    MAINTENANCE("Đang bảo trì"),
+    MERGED("Đã gộp");
 
     private final String description;
 

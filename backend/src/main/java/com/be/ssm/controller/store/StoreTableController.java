@@ -4,6 +4,8 @@ package com.be.ssm.controller.store;
 import com.be.ssm.dto.common.APIResponse;
 import com.be.ssm.dto.common.PageDTO;
 import com.be.ssm.dto.filter.StoreTableFilter;
+import com.be.ssm.dto.request.store.MergeTablesRequest;
+import com.be.ssm.dto.request.store.MoveTableRequest;
 import com.be.ssm.dto.request.store.StoreTableCreateRequest;
 import com.be.ssm.dto.request.store.StoreTableUpdateRequest;
 import com.be.ssm.dto.response.store.StoreTableResponse;
@@ -141,6 +143,99 @@ public class StoreTableController {
                         true,
                         "Store tables retrieved successfully",
                         response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
+    }
+
+    // =========================
+// MOVE TABLE
+// =========================
+    @PutMapping("/{id}/move")
+    @Operation(
+            summary = "Move table to another zone",
+            description = "Change table's zone (chuyển bàn sang khu vực khác)",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Table moved successfully",
+                            content = @Content(schema = @Schema(implementation = StoreTableResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Table or zone not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<APIResponse<StoreTableResponse>> moveTable(
+            @PathVariable Integer id,
+            @RequestBody @Valid MoveTableRequest request,
+            HttpServletRequest httpRequest) {
+
+        StoreTableResponse response = storeTableService.moveTable(id, request);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Table moved successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
+    }
+
+    // =========================
+// MERGE TABLES
+// =========================
+    @PostMapping("/merge")
+    @Operation(
+            summary = "Merge two tables",
+            description = "Merge source table into target table",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Tables merged successfully"),
+                    @ApiResponse(responseCode = "404", description = "Table not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<APIResponse<Void>> mergeTables(
+            @RequestBody @Valid MergeTablesRequest request,
+            HttpServletRequest httpRequest) {
+
+        storeTableService.mergeTables(request);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Tables merged successfully",
+                        null,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
+    }
+
+    // =========================
+// UNMERGE TABLE
+// =========================
+    @PutMapping("/{id}/unmerge")
+    @Operation(
+            summary = "Unmerge table",
+            description = "Split merged table back to normal",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Table unmerged successfully"),
+                    @ApiResponse(responseCode = "404", description = "Table not found"),
+                    @ApiResponse(responseCode = "400", description = "Table is not merged"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<APIResponse<Void>> unmergeTable(
+            @PathVariable Integer id,
+            HttpServletRequest httpRequest) {
+
+        storeTableService.unmergeTable(id);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Table unmerged successfully",
+                        null,
                         null,
                         httpRequest.getRequestURI()
                 )

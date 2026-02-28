@@ -33,4 +33,9 @@ public class StoreTables {
     @Column(name = "status", nullable = false, length = 20)
     private TableStatus status;
 
+    @Column(name = "merged_into_table_id")
+    private Integer mergedIntoTableId;
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
 }

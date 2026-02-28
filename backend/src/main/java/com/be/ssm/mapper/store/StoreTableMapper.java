@@ -11,11 +11,19 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface StoreTableMapper {
     StoreTableResponse toStoreTableResponse(StoreTables storeTables);
 
     StoreTables toStoreTableEntity(StoreTableCreateRequest request);
+
+    default List<StoreTableResponse> toStoreTableResponses(List<StoreTables> tables) {
+        return tables.stream()
+                .map(this::toStoreTableResponse)
+                .toList();
+    }
 
     @BeanMapping(nullValuePropertyMappingStrategy
             = NullValuePropertyMappingStrategy.IGNORE)

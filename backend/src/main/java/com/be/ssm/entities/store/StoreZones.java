@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -35,4 +37,7 @@ public class StoreZones {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
+
+    @OneToMany(mappedBy = "zone", fetch = FetchType.LAZY)
+    private List<StoreTables> tables;
 }

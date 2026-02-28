@@ -5,6 +5,7 @@ import com.be.ssm.dto.common.PageDTO;
 import com.be.ssm.dto.filter.StoreZoneFilter;
 import com.be.ssm.dto.request.store.StoreZonesCreateRequest;
 import com.be.ssm.dto.request.store.StoreZonesUpdateRequest;
+import com.be.ssm.dto.response.store.StoreZoneLayoutResponse;
 import com.be.ssm.dto.response.store.StoreZoneResponse;
 import com.be.ssm.service.store.StoreZoneService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -138,6 +141,32 @@ public class StoreZoneController {
                         true,
                         "Store zones retrieved successfully",
                         response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
+    }
+
+    @GetMapping("/layout")
+    @Operation(
+            summary = "Get store layout",
+            description = "Retrieve full layout of zones and tables by store id",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Store layout retrieved successfully",
+                            content = @Content(schema = @Schema(implementation = StoreZoneLayoutResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Store not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+        public ResponseEntity<APIResponse<List<StoreZoneLayoutResponse>>> getLayout(
+            @RequestParam Integer storeId,
+            HttpServletRequest httpRequest
+    ) {
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Store layout retrieved successfully",
+                        storeZoneService.getLayoutByStore(storeId),
                         null,
                         httpRequest.getRequestURI()
                 )

@@ -4,12 +4,15 @@ import com.be.ssm.dto.common.PageDTO;
 import com.be.ssm.dto.filter.StoreZoneFilter;
 import com.be.ssm.dto.request.store.StoreZonesCreateRequest;
 import com.be.ssm.dto.request.store.StoreZonesUpdateRequest;
+import com.be.ssm.dto.response.store.StoreZoneLayoutResponse;
 import com.be.ssm.dto.response.store.StoreZoneResponse;
+import com.be.ssm.entities.store.StoreTables;
 import com.be.ssm.entities.store.StoreZones;
 import com.be.ssm.entities.store.Stores;
 import com.be.ssm.exceptions.CustomException;
 import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.store.StoreZoneMapper;
+import com.be.ssm.repository.store.StoreTablesRepository;
 import com.be.ssm.repository.store.StoreZonesRepository;
 import com.be.ssm.repository.store.StoresRepository;
 import com.be.ssm.service.store.StoreZoneService;
@@ -20,6 +23,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -77,5 +82,15 @@ public class StoreZoneServiceImpl implements StoreZoneService {
 
         return repository.findById(id)
                 .orElseThrow(()-> new CustomException(Error.STORE_ZONE_NOT_FOUND));
+    }
+
+    @Override
+    public List<StoreZoneLayoutResponse> getLayoutByStore(Integer storeId) {
+
+        List<StoreZones> zones = repository.findByStoreStoreId(storeId);
+
+        return zones.stream()
+                .map(mapper::toStoreZoneLayoutResponse)
+                .toList();
     }
 }
