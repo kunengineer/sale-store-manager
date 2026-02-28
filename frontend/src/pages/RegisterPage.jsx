@@ -2,23 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // ── import toast & services của bạn ──────────────────────────
-// import { useToast } from '../layout/Toast'
-// import { createAccount, createStore } from '../data/services/accountService'
+import { useToast } from '../layout/Toast.jsx'
+import { createAccount } from '../data/services/accountService.js'
+import { createStore } from '../data/services/storeService.js'
 
-// ── Mock (xoá khi có service thật) ───────────────────────────
-const useToast = () => ({
-  success: (t, m) => console.log('✅', t, m),
-  error: (t, m) => console.log('❌', t, m),
-})
-const createAccount = async (payload) => {
-  await new Promise(r => setTimeout(r, 1000))
-  if (payload.username === 'admin01') throw { response: { data: { errors: [{ code: 1003 }] } } }
-  return { accountId: 42, fullName: payload.fullName, userName: payload.username }
-}
-const createStore = async (payload) => {
-  await new Promise(r => setTimeout(r, 1000))
-  console.log('Store created:', payload)
-}
 // ─────────────────────────────────────────────────────────────
 
 const ERROR_CODES = {
@@ -121,23 +108,29 @@ function Step1({ onSuccess }) {
     setLoading(true)
     try {
       const res = await createAccount({
-        fullName: form.fullName,
-        username: form.username,
-        email:    form.email,
-        password: form.password,
-        role:     form.role,
-      })
-      toast.success('Tạo tài khoản thành công!', `Chào ${res.fullName} 👋`)
-      onSuccess(res.accountId)
+          fullName: form.fullName,
+          username: form.username,
+          email:    form.email,
+          password: form.password,
+          role:     form.role,
+        })
+
+        console.log('Account created:', res)  // interceptor unwrap APIResponse → res = AccountResponse trực tiếp
+      // interceptor unwrap APIResponse → res = AccountResponse trực tiếp
+      // res = { accountId, fullName, userName, email, createdAt, role }
+      toast.success('Tạo tài khoản thành công!', `Chào ${res.data.fullName} `)
+      onSuccess(res.data.accountId)
+      localStorage.setItem('accountId', res.data.accountId)  // ← tạm lưu accountId để dùng bước 2, sau này có thể xoá
+
     } catch (err) {
-      const apiErrors = err?.response?.data?.errors ?? []
+      // err = { status, message, errors } — do interceptor format
       const fieldErrors = {}
-      apiErrors.forEach(({ code }) => {
+      ;(err.errors ?? []).forEach(({ code }) => {
         const mapped = ERROR_CODES[code]
         if (mapped) fieldErrors[mapped.field] = mapped.message
       })
       if (Object.keys(fieldErrors).length) setErrors(fieldErrors)
-      else toast.error('Có lỗi xảy ra!', 'Vui lòng thử lại sau')
+      else toast.error('Có lỗi xảy ra!', err.message)
     } finally {
       setLoading(false)
     }
@@ -204,8 +197,9 @@ function Step2({ accountId, onBack, onDone }) {
     if (Object.keys(e).length) { setErrors(e); return }
 
     setLoading(true)
+    const accountId = localStorage.getItem('accountId')  // ← lấy accountId đã lưu tạm ở bước 1
     try {
-      await createStore({
+      const res = await createStore({
         storeCode: form.storeCode,
         storeName: form.storeName,
         address:   form.address,
@@ -216,6 +210,7 @@ function Step2({ accountId, onBack, onDone }) {
         accountId,
       })
       toast.success('Tạo cửa hàng thành công!', 'Chào mừng bạn đến với hệ thống!')
+      localStorage.removeItem('accountId') 
       onDone()
     } catch (err) {
       toast.error('Có lỗi xảy ra!', 'Không thể tạo cửa hàng, vui lòng thử lại')

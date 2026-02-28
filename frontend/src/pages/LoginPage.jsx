@@ -31,8 +31,8 @@ export function LoginPage() {
         if (role === 'ADMIN') {
           // TODO: xử lý luồng ADMIN
           // - check hasStore -> navigate store setup nếu chưa có
-          // - navigate('/app/admin')
           toast.success('Đăng nhập thành công', 'Chào mừng quản trị viên!')
+          navigate('/app/admin')
         } else {
           // TODO: xử lý luồng EMPLOYEE
           // - navigate('/app/pos') hoặc trang nhân viên

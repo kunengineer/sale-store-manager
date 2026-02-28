@@ -26,9 +26,14 @@ axiosInstance.interceptors.response.use(
     // tự động unwrap lấy .data bên trong
     return response.data ?? response
   },
+  // axiosConfig.js — sửa phần response error
   (error) => {
-    const message = error.response?.data?.message || 'Có lỗi xảy ra'
-    return Promise.reject({ status: error.response?.status, message })
+    const data = error.response?.data
+    return Promise.reject({
+      status: error.response?.status,
+      message: data?.message || 'Có lỗi xảy ra',
+      errors: data?.errors ?? [],   // ← giữ lại errors array
+    })
   }
 )
 
