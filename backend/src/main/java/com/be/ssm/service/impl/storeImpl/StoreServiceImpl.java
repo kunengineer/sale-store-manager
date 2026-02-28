@@ -40,9 +40,9 @@ public class StoreServiceImpl implements StoreService {
     public List<StoreResponse> getByManager() {
 
         Accounts manager = userDetailsService.getAccountAuth();
-        Stores store = repository.findStoresByManager(manager);
+        List<Stores> store = repository.findAllByManager(manager);
 
-        return mapper.toStoreResponse(store);
+        return mapper.toStoreResponseList(store);
     }
 
     @Override
