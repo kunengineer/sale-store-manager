@@ -5,7 +5,7 @@ import { MOCK_STORES } from '../data/mockPosData'
 const StoreContext = createContext(null)
 
 export function StoreProvider({ children }) {
-  const [currentStoreId, setCurrentStoreId] = useState(1)
+  const [currentStoreId, setCurrentStoreId] = useState(4)
   // Cài đặt giao diện/hệ thống tạm thời để sau này nối API
   const [settings, setSettings] = useState({
     autoDarkModeOnPos: true,

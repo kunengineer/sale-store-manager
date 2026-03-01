@@ -33,7 +33,7 @@ export function PosProvider({ children }) {
     return zones.flatMap((z) =>
       (z.tables ?? []).map((t) => ({
         id: t.tableId,
-        name: t.tableName,
+        name: t.tableCode,
         status: t.status, 
         areaId: z.zoneId,
         openedAt: t.openedAt,
