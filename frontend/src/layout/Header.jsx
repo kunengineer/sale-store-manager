@@ -30,7 +30,11 @@ export function Header() {
         <div className="flex items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-xs text-[var(--text)]">
           <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
           <select
-            className="bg-transparent text-xs outline-none text-[var(--text)]"
+             className="bg-transparent text-xs outline-none cursor-pointer
+              text-[var(--text)] border border-[var(--border,#334155)] 
+              rounded-lg px-2 py-1.5 pr-6
+              hover:border-emerald-500/50 transition-colors duration-200
+              focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
             value={currentStoreId}
             onChange={(e) => setCurrentStoreId(e.target.value)}
           >
