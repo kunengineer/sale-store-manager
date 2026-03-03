@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { signIn } from '../data/services/accountService.js'
 import { useToast } from '../layout/Toast.jsx'
+import { getStoreByOwner } from '../data/services/storeService'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -34,10 +35,15 @@ export function LoginPage() {
         localStorage.setItem('refreshToken', refreshToken)
         localStorage.setItem('role', userRole)
         if (role === 'ADMIN') {
-          // TODO: xử lý luồng ADMIN
-          // - check hasStore -> navigate store setup nếu chưa có
-          toast.success('Đăng nhập thành công', 'Chào mừng quản trị viên!')
-          navigate('/app/admin')
+          const storeRes = await getStoreByOwner()
+
+          if (!storeRes.data || storeRes.data.length === 0) {
+            toast.success('Đăng nhập thành công', 'Vui lòng tạo cửa hàng')
+            navigate('/register', { state: { step: 2 } })
+          } else {
+            toast.success('Đăng nhập thành công', 'Chào mừng quản trị viên!')
+            navigate('/app/admin')
+          }
         } else {
           // TODO: xử lý luồng EMPLOYEE
           // - navigate('/app/pos') hoặc trang nhân viên
@@ -45,10 +51,10 @@ export function LoginPage() {
         }
       }
     } catch (err) {
-      if (err.status === 401)      setError('Sai tên đăng nhập hoặc mật khẩu')
+      if (err.status === 401) setError('Sai tên đăng nhập hoặc mật khẩu')
       else if (err.status === 403) setError('Tài khoản không có quyền truy cập')
       else if (err.status === 404) setError('Tài khoản không tồn tại')
-      else                         setError(err.message ?? 'Có lỗi xảy ra. Vui lòng thử lại sau.')
+      else setError(err.message ?? 'Có lỗi xảy ra. Vui lòng thử lại sau.')
     } finally {
       setLoading(false)
     }

@@ -24,17 +24,22 @@ export function StoreProvider({ children }) {
       try {
         // interceptor đã unwrap APIResponse → res = data (array stores)
         const res = await getStoreByOwner()
+        
         console.log('Fetched stores:', res)
         if (res.data.length === 0) {
           // Không có store → redirect sang bước 2 đăng ký
           // accountId lấy từ JWT ở BE, không cần truyền
-          navigate('/register', { state: { step: 2 } })
+          // navigate('/register', { state: { step: 2 } })
+
+          setStores([])
+          setCurrentStoreId(null)
+          return
           return
         }
 
         setStores(res.data)
         setCurrentStoreId(res.data[0].storeId) // mặc định chọn store đầu tiên
-        console.log('Current store ID set to:', stores)
+        console.log('Current store ID set to:', res.data[0].storeId)
         console.log('Current store ID set to:', currentStoreId)
       } catch (err) {
         console.error('Failed to fetch stores:', err)
