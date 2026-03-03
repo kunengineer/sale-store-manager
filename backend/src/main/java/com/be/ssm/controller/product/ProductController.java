@@ -6,6 +6,7 @@ import com.be.ssm.dto.common.PageDTO;
 import com.be.ssm.dto.filter.ProductFilter;
 import com.be.ssm.dto.request.product.ProductCreateRequest;
 import com.be.ssm.dto.request.product.ProductUpdateRequest;
+import com.be.ssm.dto.response.product.PosProductResponse;
 import com.be.ssm.dto.response.product.ProductResponse;
 import com.be.ssm.service.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -128,6 +131,36 @@ public class ProductController {
                 new APIResponse<>(
                         true,
                         "Products retrieved successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
+    }
+
+    @GetMapping("/pos")
+    @Operation(
+            summary = "Get products for POS",
+            description = "Retrieve active products with variants and store price for POS",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Products retrieved successfully",
+                            content = @Content(schema = @Schema(implementation = PosProductResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid store id"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<APIResponse<List<PosProductResponse>>> getProductsForPos(
+            @RequestParam Integer storeId,
+            HttpServletRequest httpRequest
+    ) {
+
+        List<PosProductResponse> response =
+                productService.getProductsForPos(storeId);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "POS products retrieved successfully",
                         response,
                         null,
                         httpRequest.getRequestURI()

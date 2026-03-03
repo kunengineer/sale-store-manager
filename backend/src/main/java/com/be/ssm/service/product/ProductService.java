@@ -4,8 +4,11 @@ import com.be.ssm.dto.common.PageDTO;
 import com.be.ssm.dto.filter.ProductFilter;
 import com.be.ssm.dto.request.product.ProductCreateRequest;
 import com.be.ssm.dto.request.product.ProductUpdateRequest;
+import com.be.ssm.dto.response.product.PosProductResponse;
 import com.be.ssm.dto.response.product.ProductResponse;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface ProductService {
@@ -18,4 +21,6 @@ public interface ProductService {
     PageDTO<ProductResponse> getAll(int page, int size, ProductFilter filter);
 
 //     void decreaseStock(Integer productId, int quantity);
+
+    List<PosProductResponse> getProductsForPos(Integer storeId);
 }
