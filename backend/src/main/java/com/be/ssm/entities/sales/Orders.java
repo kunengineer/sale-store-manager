@@ -2,15 +2,12 @@ package com.be.ssm.entities.sales;
 
 import com.be.ssm.entities.identity.Employees;
 import com.be.ssm.entities.store.StoreTables;
-import com.be.ssm.entities.store.Stores;
 import com.be.ssm.enums.sales.OrderStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,6 +20,9 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 public class Orders {
+
+    private static final BigDecimal ZERO = BigDecimal.ZERO.setScale(2);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
@@ -45,31 +45,32 @@ public class Orders {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private OrderStatus status = OrderStatus.PENDING;
+    private OrderStatus status;
 
     @Column(name = "subtotal", nullable = false, precision = 15, scale = 2)
     private BigDecimal subtotal;
 
     @Column(name = "discount_amount", nullable = false, precision = 15, scale = 2)
-    private BigDecimal discountAmount = BigDecimal.ZERO;
+    private BigDecimal discountAmount;
 
-    @Column(name = "vat", precision = 15, scale = 2)
-    private BigDecimal vat = BigDecimal.ZERO;
+    @Column(name = "vat", precision = 5, scale = 2)
+    private BigDecimal vat; // %
 
     @Column(name = "tax_amount", nullable = false, precision = 15, scale = 2)
-    private BigDecimal taxAmount = BigDecimal.ZERO;
+    private BigDecimal taxAmount;
 
     @Column(name = "grand_total", nullable = false, precision = 15, scale = 2)
-    private BigDecimal grandTotal = BigDecimal.ZERO;
+    private BigDecimal grandTotal;
 
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
     @OneToMany(
             mappedBy = "order",
-            cascade = CascadeType.ALL,   // ← save Orders → tự save OrderItems
-            orphanRemoval = true         // ← xóa Orders → tự xóa OrderItems
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
     )
+    @Builder.Default
     private List<OrderItems> orderItems = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -78,23 +79,78 @@ public class Orders {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
+    // ===============================
+    // BUSINESS LOGIC
+    // ===============================
+
     @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        if (this.orderNumber == null) {
-            this.orderNumber = buildOrderNumber();
+    @PreUpdate
+    private void prePersist() {
+
+        if (status == null) {
+            status = OrderStatus.IN_PROGRESS;
+        }
+
+        if (vat == null) {
+            vat = BigDecimal.ZERO;
+        }
+
+        calculateTotals();
+
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+
+        if (orderNumber == null) {
+            orderNumber = buildOrderNumber();
         }
     }
 
-    private String buildOrderNumber() {
-        String date = LocalDate.now().format(
-                DateTimeFormatter.ofPattern("yyyyMMdd")
-        );
-        String random = String.valueOf(
-                (int)(Math.random() * 900000) + 100000  // 6 chữ số
-        );
-        return "ORD-" + date + "-" + random;
-        // → ORD-20250623-482910
+    private void calculateTotals() {
+
+        subtotal = orderItems.stream()
+                .map(OrderItems::getLineTotal)
+                .filter(v -> v != null)
+                .reduce(ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        if (discountAmount == null) {
+            discountAmount = ZERO;
+        }
+
+        BigDecimal afterDiscount = subtotal.subtract(discountAmount);
+
+        taxAmount = afterDiscount
+                .multiply(vat)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+        grandTotal = afterDiscount
+                .add(taxAmount)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
+    private String buildOrderNumber() {
+        String date = LocalDate.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        String random = String.valueOf(
+                (int) (Math.random() * 900000) + 100000
+        );
+
+        return "ORD-" + date + "-" + random;
+    }
+
+    // ===============================
+    // Helper for bi-directional mapping
+    // ===============================
+
+    public void addItem(OrderItems item) {
+        item.setOrder(this);
+        orderItems.add(item);
+    }
+
+    public void removeItem(OrderItems item) {
+        orderItems.remove(item);
+        item.setOrder(null);
+    }
 }

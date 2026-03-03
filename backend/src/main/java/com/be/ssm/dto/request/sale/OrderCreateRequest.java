@@ -12,16 +12,16 @@ import java.util.List;
 @Data
 @Builder
 public class OrderCreateRequest {
-    @NotNull(message = "Subtotal must not be null")
-    @DecimalMin(value = "0.00", inclusive = true, message = "Subtotal must be >= 0")
-    @Digits(integer = 13, fraction = 2)
-    @Schema(example = "500000.00")
-    private BigDecimal subtotal;
+//    @NotNull(message = "Subtotal must not be null")
+//    @DecimalMin(value = "0.00", inclusive = true, message = "Subtotal must be >= 0")
+//    @Digits(integer = 13, fraction = 2)
+//    @Schema(example = "500000.00")
+//    private BigDecimal subtotal;
 
-    @DecimalMin(value = "0.00", inclusive = true)
-    @Digits(integer = 13, fraction = 2)
-    @Schema(example = "10.00")
-    private BigDecimal vat;
+//    @DecimalMin(value = "0.00", inclusive = true)
+//    @Digits(integer = 13, fraction = 2)
+//    @Schema(example = "10.00")
+//    private BigDecimal vat;
 
     @Size(max = 1000)
     @Schema(example = "Customer requests less ice")

@@ -7,6 +7,7 @@ import com.be.ssm.dto.request.sale.OrderItemCreateRequest;
 import com.be.ssm.dto.request.sale.OrderUpdateRequest;
 import com.be.ssm.dto.response.sale.OrderItemResponse;
 import com.be.ssm.dto.response.sale.OrderResponse;
+import com.be.ssm.entities.account.Accounts;
 import com.be.ssm.entities.identity.Employees;
 import com.be.ssm.entities.product.ProductVariants;
 import com.be.ssm.entities.sales.Customers;
@@ -15,6 +16,7 @@ import com.be.ssm.entities.sales.Orders;
 import com.be.ssm.entities.store.StoreProductPrice;
 import com.be.ssm.entities.store.StoreTables;
 import com.be.ssm.entities.store.StoreVariantPrice;
+import com.be.ssm.enums.store.TableStatus;
 import com.be.ssm.exceptions.CustomException;
 import com.be.ssm.exceptions.Error;
 import com.be.ssm.helper.OrderTotalCalculator;
@@ -27,6 +29,7 @@ import com.be.ssm.repository.sales.OrdersRepository;
 import com.be.ssm.repository.store.StoreProductPriceRepository;
 import com.be.ssm.repository.store.StoreTablesRepository;
 import com.be.ssm.repository.store.StoreVariantPriceRepository;
+import com.be.ssm.service.impl.accountImpl.OurUserDetailsService;
 import com.be.ssm.service.sale.OrderItemService;
 import com.be.ssm.service.sale.OrderService;
 import com.be.ssm.specification.OrderSpecification;
@@ -54,6 +57,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrdersMapper mapper;
     private final OrderItemService orderItemService;
+    private final OurUserDetailsService userDetailsService;
 
 
     @Override
@@ -64,19 +68,28 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrderResponse getByTable(Integer tableId) {
+
+        return mapper.toOrderResponse(repository.findOrderByTable(tableId));
+    }
+
+    @Override
     public OrderResponse create(OrderCreateRequest request) {
         log.info("Create new order");
 
         StoreTables table = findStoreTableById(request.getTableId());
-        // Employees employee = findEmployeeById(request.get());
+        Accounts accounts = userDetailsService.getAccountAuth();
+        log.info("Create new account {}", accounts);
+        Employees employee = findEmployeeByAccount(userDetailsService.getAccountAuth());
+        log.info("employee table {}", employee);
         Customers customer = request.getCustomerId() != null ? findCustomerById(request.getCustomerId()) : null;
 
         Orders order = mapper.toOrderEntity(request);
         order.setStoreTables(table);
-        // order.setEmployees();
+        order.setEmployees(employee);
         order.setCustomers(customer);
 
-        Integer storeId = order.getStoreTables().getZone().getStore().getStoreId();
+        Integer storeId = employee.getStore().getStoreId();
 
         List<OrderItems> items = orderItemService.buildItems(request.getItems(), order, storeId);
 
@@ -84,7 +97,12 @@ public class OrderServiceImpl implements OrderService {
 
         orderTotalCalculator.recalculateFromItems(order);
 
-        return mapper.toOrderResponse(repository.save(order));
+        repository.save(order);
+
+        table.setStatus(TableStatus.OCCUPIED);
+        storeTablesRepository.save(table);
+
+        return mapper.toOrderResponse(order);
     }
 
     @Override
@@ -153,10 +171,10 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(()-> new CustomException(Error.CUSTOMER_NOT_FOUND));
     }
 
-    private  Employees findEmployeeById(Integer id) {
-        log.info("Finding employee by id {}", id);
+    private  Employees findEmployeeByAccount(Accounts a) {
+        log.info("Finding employee by account");
 
-        return employeesRepository.findById(id)
+        return employeesRepository.findEmployeesByAccount_AccountId(a.getAccountId())
                 .orElseThrow();
     }
 

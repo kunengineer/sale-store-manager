@@ -4,14 +4,20 @@ import com.be.ssm.dto.request.sale.OrderItemCreateRequest;
 import com.be.ssm.dto.request.sale.OrderItemUpdateRequest;
 import com.be.ssm.dto.response.sale.OrderItemResponse;
 import com.be.ssm.entities.sales.OrderItems;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface OrderItemMapper {
+
+    @Mapping(target = "variantId", expression = "java(getVariantId(orderItems))")
     OrderItemResponse toOrderItemResponse(OrderItems orderItems);
+
+    default Integer getVariantId(OrderItems orderItems) {
+        if (orderItems == null || orderItems.getProductVariants() == null) {
+            return null;
+        }
+        return orderItems.getProductVariants().getVariantId();
+    }
 
     OrderItems toOrderItemEntity(OrderItemCreateRequest request);
 

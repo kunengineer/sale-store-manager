@@ -5,10 +5,7 @@ import com.be.ssm.dto.request.sale.OrderCreateRequest;
 import com.be.ssm.dto.request.sale.OrderUpdateRequest;
 import com.be.ssm.dto.response.sale.OrderResponse;
 import com.be.ssm.entities.sales.Orders;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 import org.springframework.data.domain.Page;
 
 @Mapper(
@@ -19,6 +16,20 @@ public interface OrdersMapper {
 
     OrderResponse toOrderResponse(Orders orders);
 
+    @Mapping(target = "orderId", ignore = true)
+    @Mapping(target = "orderNumber", ignore = true)
+    @Mapping(target = "customers", ignore = true)
+    @Mapping(target = "employees", ignore = true)
+    @Mapping(target = "storeTables", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "subtotal", ignore = true)
+    @Mapping(target = "discountAmount", ignore = true)
+    @Mapping(target = "vat", ignore = true)
+    @Mapping(target = "taxAmount", ignore = true)
+    @Mapping(target = "grandTotal", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "completedAt", ignore = true)
+    @Mapping(target = "orderItems", source = "items")
     Orders toOrderEntity(OrderCreateRequest request);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

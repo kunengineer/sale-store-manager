@@ -1,7 +1,6 @@
 package com.be.ssm.entities.sales;
 
 import com.be.ssm.entities.product.ProductVariants;
-import com.be.ssm.entities.product.Products;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Data
 @Builder
@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Entity
 public class OrderItems {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_item_id")
@@ -48,7 +49,39 @@ public class OrderItems {
     private String note;
 
     @PrePersist
+    @PreUpdate
     public void prePersist() {
 
+        // ===== DEFAULT VALUE =====
+        if (quantity == null) {
+            quantity = 1;
+        }
+
+        if (unitPrice == null) {
+            unitPrice = BigDecimal.ZERO;
+        }
+
+        if (discountPct == null) {
+            discountPct = BigDecimal.ZERO;
+        }
+
+        if (discountAmt == null) {
+            discountAmt = BigDecimal.ZERO;
+        }
+
+        // ===== TÍNH DISCOUNT AMOUNT (nếu có %) =====
+        if (discountPct.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal gross = unitPrice.multiply(BigDecimal.valueOf(quantity));
+            discountAmt = gross
+                    .multiply(discountPct)
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        }
+
+        // ===== TÍNH LINE TOTAL =====
+        BigDecimal gross = unitPrice.multiply(BigDecimal.valueOf(quantity));
+
+        lineTotal = gross
+                .subtract(discountAmt)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 }

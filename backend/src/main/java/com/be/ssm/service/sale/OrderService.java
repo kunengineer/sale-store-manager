@@ -14,6 +14,8 @@ import java.util.List;
 public interface OrderService {
     OrderResponse getById(Integer id);
 
+    OrderResponse getByTable(Integer tableId);
+
     OrderResponse create(OrderCreateRequest request);
 
     OrderResponse addItems(Integer orderId, List<OrderItemCreateRequest> newItems);
