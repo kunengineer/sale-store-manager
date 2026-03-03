@@ -194,11 +194,10 @@ function ChangeTableModal({ open, onClose }) {
               key={t.id}
               type="button"
               onClick={() => handleChange(t.id)}
-              className={`rounded-lg border px-2 py-1.5 text-left text-[11px] ${
-                selectedTable?.id === t.id
+              className={`rounded-lg border px-2 py-1.5 text-left text-[11px] ${selectedTable?.id === t.id
                   ? 'border-emerald-500 bg-emerald-500/10'
                   : 'border-slate-700 bg-slate-900'
-              }`}
+                }`}
             >
               <span className="block text-xs font-semibold text-slate-50">
                 Bàn {t.name}
@@ -238,77 +237,84 @@ export function PosOrderColumn() {
 
   const tableTimeText = useMemo(() => {
     if (!selectedTable) return null
-  
+
     const src =
       selectedTable.status === 'using'
         ? selectedTable.openedAt
         : selectedTable.status === 'reserved'
           ? selectedTable.reservedAt
           : null
-  
+
     if (!src) return null
-  
+
     const d = new Date(src)
     const date = d.toLocaleDateString('vi-VN') // dd/MM/yyyy
     const time = d.toLocaleTimeString('vi-VN', {
       hour: '2-digit',
       minute: '2-digit',
     })
-  
+
     return `${date} · ${time}`
   }, [selectedTable])
 
   return (
     <>
       <section
-        className={`flex w-[28%] min-w-[260px] max-w-[360px] flex-col rounded-xl border ${
-          theme === 'dark'
+        className={`flex w-[28%] min-w-[260px] max-w-[360px] flex-col rounded-xl border ${theme === 'dark'
             ? 'border-[var(--border)] bg-[var(--surface)]'
             : 'border-[var(--border)] bg-[var(--surface-solid)]'
-        }`}
+          }`}
       >
         <div className="flex items-start justify-between border-b border-[var(--border)] px-3 py-2">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold text-[var(--text)]">
-              {selectedTable ? `Bàn ${selectedTable.name}` : 'Chưa chọn bàn'}
-            </p>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold text-[var(--text)]">
+                {selectedTable ? `Bàn ${selectedTable.name}` : 'Chưa chọn bàn'}
+              </p>
 
-            {tableTimeText && (
-              <span className="inline-block rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">
-                {selectedTable.status === 'using' ? 'Mở lúc' : 'Đặt lúc'} {tableTimeText}
-              </span>
-            )}
+              {tableTimeText && (
+                <span className="inline-block rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">
+                  {selectedTable.status === 'using' ? 'Mở lúc' : 'Đặt lúc'} {tableTimeText}
+                </span>
+              )}
+            </div>
+
+            <p className="text-xs text-emerald-600">
+              {selectedTable
+                ? selectedTable.status === 'using'
+                  ? `Đang phục vụ · ${selectedTable.guests ?? 0} khách`
+                  : selectedTable.status === 'reserved'
+                    ? `Đã đặt chỗ`
+                    : 'Trống'
+                : 'Chọn bàn để tạo hóa đơn'}
+            </p>
           </div>
 
-          <p className="text-xs text-emerald-600">
-            {selectedTable
-              ? selectedTable.status === 'using'
-                ? `Đang phục vụ · ${selectedTable.guests ?? 0} khách`
-                : selectedTable.status === 'reserved'
-                  ? `Đã đặt chỗ`
-                  : 'Trống'
-              : 'Chọn bàn để tạo hóa đơn'}
-          </p>
+          <button
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1.5 text-[11px] text-[var(--text)] hover:border-emerald-500 transition"
+            type="button"
+            onClick={() => setOpenChangeTable(true)}
+          >
+            Đổi bàn
+          </button>
         </div>
-
-        <button
-          className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1.5 text-[11px] text-[var(--text)] hover:border-emerald-500 transition"
-          type="button"
-          onClick={() => setOpenChangeTable(true)}
-        >
-          Đổi bàn
-        </button>
-      </div>
 
         <div className="flex-1 divide-y divide-[var(--border)] overflow-auto">
           {orderItems.map((item) => (
             <div
-              key={item.productId}
+              key={item.id}
               className="flex items-start justify-between px-3 py-2 text-xs"
             >
               <div className="flex-1">
-                <p className="text-sm text-[var(--text)]">{item.name}</p>
+                <p className="text-sm font-medium">
+                  {item.productName} - {item.base?.variantName}
+                </p>
+
+                {item.toppings?.map(t => (
+                  <p key={t.variantId} className="text-[11px] text-[var(--muted)] ml-2">
+                    + {t.variantName}
+                  </p>
+                ))}
                 {item.note && (
                   <p className="text-[11px] text-[var(--muted)]">{item.note}</p>
                 )}
@@ -325,14 +331,14 @@ export function PosOrderColumn() {
                 <div className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-1.5 py-0.5 text-[10px] text-[var(--text)]">
                   <button
                     type="button"
-                    onClick={() => changeItemQty(item.productId, -1)}
+                    onClick={() => changeItemQty(item.id, -1)}
                   >
                     -
                   </button>
                   <span>{item.qty}</span>
                   <button
                     type="button"
-                    onClick={() => changeItemQty(item.productId, 1)}
+                    onClick={() => changeItemQty(item.id, 1)}
                   >
                     +
                   </button>

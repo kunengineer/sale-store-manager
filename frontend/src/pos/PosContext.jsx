@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { MOCK_ORDERS_BY_TABLE, MOCK_PRODUCTS } from '../data/mockPosData'
 import { useStore } from '../store/StoreContext'
 import { getStoreLayout } from '../data/services/storeZoneApi'
+import { getProducts } from '../data/services/productService'
 import { useQuery } from '@tanstack/react-query'
 
 const PosContext = createContext(null)
@@ -16,6 +17,13 @@ export function PosProvider({ children }) {
     enabled: !!currentStoreId,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
+  })
+
+  const { data: productData } = useQuery({
+    queryKey: ['posProducts', currentStoreId],
+    queryFn: () => getProducts(currentStoreId),
+    enabled: !!currentStoreId,
+    staleTime: 1000 * 60 * 5,
   })
 
   // ====== MAP AREAS ======
@@ -34,7 +42,7 @@ export function PosProvider({ children }) {
       (z.tables ?? []).map((t) => ({
         id: t.tableId,
         name: t.tableCode,
-        status: t.status, 
+        status: t.status,
         areaId: z.zoneId,
         openedAt: t.openedAt,
         reservedAt: t.reservedAt,
@@ -75,36 +83,24 @@ export function PosProvider({ children }) {
   }
 
   // ====== ORDER ACTIONS ======
-  const addProductToOrder = (productId) => {
-    const product = MOCK_PRODUCTS.find((p) => p.id === productId)
-    if (!product) return
-
-    setOrderItems((prev) => {
-      const existing = prev.find((i) => i.productId === productId)
-      if (existing) {
-        return prev.map((i) =>
-          i.productId === productId ? { ...i, qty: i.qty + 1 } : i,
-        )
+  const addProductToOrder = (item) => {
+    setOrderItems(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        ...item,
+        qty: 1,
       }
-      return [
-        ...prev,
-        {
-          productId,
-          name: product.name,
-          price: product.price,
-          qty: 1,
-        },
-      ]
-    })
+    ])
   }
 
-  const changeItemQty = (productId, delta) => {
-    setOrderItems((prev) =>
+  const changeItemQty = (id, delta) => {
+    setOrderItems(prev =>
       prev
-        .map((i) =>
-          i.productId === productId ? { ...i, qty: i.qty + delta } : i,
+        .map(i =>
+          i.id === id ? { ...i, qty: i.qty + delta } : i
         )
-        .filter((i) => i.qty > 0),
+        .filter(i => i.qty > 0)
     )
   }
 
@@ -115,18 +111,19 @@ export function PosProvider({ children }) {
 
   // ====== CONTEXT VALUE ======
   const value = {
-    areas,            
+    areas,
     tables: allTables,        // tất cả bàn đã map từ API
     activeAreaId,
     setActiveAreaId,
     selectedTable,
     selectTable,
-    products: MOCK_PRODUCTS,
+    products: productData?.data ?? [],
     orderItems,
     addProductToOrder,
     changeItemQty,
     subtotal,
   }
+  console.log(orderItems)
 
   return <PosContext.Provider value={value}>{children}</PosContext.Provider>
 }

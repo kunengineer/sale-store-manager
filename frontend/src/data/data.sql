@@ -66,3 +66,88 @@ JOIN (
     UNION ALL SELECT 'ST002', 'Sân Thượng', 'ST2', 4
 ) t
 ON s.store_code = t.store_code AND z.zone_name = t.zone_name;
+
+
+INSERT INTO categories
+(category_id, parent_id, category_name, image_url, sort_order, is_active, created_at)
+VALUES
+-- ROOT LEVEL
+(1, NULL, 'Coffee', '/img/coffee.png', 1, true, NOW()),
+(2, NULL, 'Tea', '/img/tea.png', 2, true, NOW()),
+(3, NULL, 'Bakery', '/img/bakery.png', 3, true, NOW()),
+(4, NULL, 'Topping', '/img/topping.png', 4, true, NOW()),
+
+-- COFFEE CHILD
+(5, 1, 'Espresso', '/img/espresso.png', 1, true, NOW()),
+(6, 1, 'Milk Coffee', '/img/milkcoffee.png', 2, true, NOW()),
+
+-- TEA CHILD
+(7, 2, 'Fruit Tea', '/img/fruittea.png', 1, true, NOW()),
+(8, 2, 'Milk Tea', '/img/milktea.png', 2, true, NOW()),
+
+-- BAKERY CHILD
+(9, 3, 'Cake', '/img/cake.png', 1, true, NOW()),
+(10, 3, 'Bread', '/img/bread.png', 2, true, NOW()),
+
+-- TOPPING CHILD
+(11, 4, 'Pearl', '/img/pearl.png', 1, true, NOW()),
+(12, 4, 'Cheese Foam', '/img/cheese.png', 2, true, NOW());
+
+
+
+INSERT INTO products
+(product_id, category_id, product_code, product_name, description, unit,
+ base_price, cost_price, images, is_active, created_at, updated_at)
+VALUES
+(1, 1, 'CF001', 'Cà phê đen', 'Đen đá truyền thống', 'ly', 20000, 10000, '[]', true, NOW(), NOW()),
+(2, 1, 'CF002', 'Cà phê sữa', 'Sữa đá', 'ly', 25000, 12000, '[]', true, NOW(), NOW()),
+(3, 1, 'CF003', 'Bạc xỉu', 'Nhiều sữa ít cafe', 'ly', 28000, 14000, '[]', true, NOW(), NOW()),
+(4, 1, 'CF004', 'Latte', 'Cafe Ý', 'ly', 35000, 18000, '[]', true, NOW(), NOW()),
+(5, 2, 'TE001', 'Trà đào', 'Đào cam sả', 'ly', 30000, 15000, '[]', true, NOW(), NOW()),
+(6, 2, 'TE002', 'Trà chanh', 'Chanh tươi', 'ly', 22000, 9000, '[]', true, NOW(), NOW()),
+(7, 2, 'TE003', 'Trà sữa', 'Truyền thống', 'ly', 32000, 16000, '[]', true, NOW(), NOW()),
+(8, 2, 'TE004', 'Matcha', 'Matcha Nhật', 'ly', 38000, 20000, '[]', true, NOW(), NOW()),
+(9, 1, 'CF005', 'Americano', 'Cafe Mỹ', 'ly', 27000, 13000, '[]', true, NOW(), NOW()),
+(10, 1, 'CF006', 'Mocha', 'Cafe socola', 'ly', 40000, 22000, '[]', true, NOW(), NOW()),
+(11, 2, 'TE005', 'Trà vải', 'Vải tươi', 'ly', 31000, 15000, '[]', true, NOW(), NOW()),
+(12, 2, 'TE006', 'Trà dâu', 'Dâu tươi', 'ly', 33000, 17000, '[]', true, NOW(), NOW());
+
+
+
+
+
+INSERT INTO product_variants
+(variant_id, product_id, variant_type, variant_name, sku, barcode,
+ attributes, price, cost_price, is_active)
+VALUES
+(1, 1, 'BASE', 'M', 'CF001-M', '111', '{}', 20000, 10000, true),
+(2, 1, 'BASE', 'L', 'CF001-L', '112', '{}', 25000, 12000, true),
+
+(3, 2, 'BASE', 'M', 'CF002-M', '113', '{}', 25000, 12000, true),
+(4, 2, 'BASE', 'L', 'CF002-L', '114', '{}', 30000, 15000, true),
+
+(5, 3, 'BASE', 'M', 'CF003-M', '115', '{}', 28000, 14000, true),
+(6, 3, 'BASE', 'L', 'CF003-L', '116', '{}', 33000, 17000, true),
+
+(7, 4, 'BASE', 'M', 'CF004-M', '117', '{}', 35000, 18000, true),
+(8, 4, 'BASE', 'L', 'CF004-L', '118', '{}', 40000, 20000, true),
+
+(9, 5, 'BASE', 'M', 'TE001-M', '119', '{}', 30000, 15000, true),
+(10, 5, 'BASE', 'L', 'TE001-L', '120', '{}', 35000, 18000, true),
+
+(11, 6, 'BASE', 'M', 'TE002-M', '121', '{}', 22000, 9000, true),
+(12, 6, 'BASE', 'L', 'TE002-L', '122', '{}', 27000, 12000, true),
+
+(20, 1, 'TOPPING', 'Trân châu', 'TOP-001', '200', '{}', 5000, 2000, true),
+(21, 1, 'TOPPING', 'Cheese Foam', 'TOP-002', '201', '{}', 7000, 3000, true);
+
+
+INSERT INTO store_variant_prices
+(store_variant_price_id, store_id, variant_id, price, is_active)
+VALUES
+(1, 4, 1, 21000, true),
+(2, 4, 2, 26000, true),
+(3, 4, 3, 26000, true),
+(4, 4, 4, 31000, true),
+(5, 4, 5, 29000, true),
+(6, 4, 6, 34000, true);

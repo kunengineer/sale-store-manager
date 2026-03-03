@@ -1,26 +1,32 @@
 import { useState, useMemo } from 'react'
 import { usePos } from './PosContext'
 import { useStore } from '../store/StoreContext'
+import ProductOptionModal from './ProductOptionModal'
 
 export function PosMenuColumn() {
   const { products, addProductToOrder } = usePos()
   const { theme } = useStore()
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('Tất cả')
-  const categories = ['Tất cả', 'Cafe', 'Trà', 'Bánh', 'Combo']
+  const [selectedProduct, setSelectedProduct] = useState(null)
+  const categories = useMemo(() => {
+    const set = new Set(products.map(p => p.categoryName))
+    return ['Tất cả', ...Array.from(set)]
+  }, [products])
 
-  const filteredProducts = useMemo(
-    () =>
-      products.filter((p) => {
-        const matchSearch = p.name
-          .toLowerCase()
-          .includes(search.trim().toLowerCase())
-        const matchCategory =
-          activeCategory === 'Tất cả' || p.category === activeCategory
-        return matchSearch && matchCategory
-      }),
-    [products, search, activeCategory],
-  )
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const matchSearch = p.productName
+        .toLowerCase()
+        .includes(search.trim().toLowerCase())
+
+      const matchCategory =
+        activeCategory === 'Tất cả' ||
+        p.categoryName === activeCategory
+
+      return matchSearch && matchCategory
+    })
+  }, [products, search, activeCategory])
 
   const outerClass =
     theme === 'dark'
@@ -42,11 +48,10 @@ export function PosMenuColumn() {
               key={cat}
               type="button"
               onClick={() => setActiveCategory(cat)}
-              className={`whitespace-nowrap rounded-full px-3 py-1 text-xs ${
-                cat === activeCategory
-                  ? 'bg-emerald-500 text-slate-950 font-medium'
-                  : 'bg-[var(--surface-2)] text-[var(--text)]'
-              }`}
+              className={`whitespace-nowrap rounded-full px-3 py-1 text-xs ${cat === activeCategory
+                ? 'bg-emerald-500 text-slate-950 font-medium'
+                : 'bg-[var(--surface-2)] text-[var(--text)]'
+                }`}
             >
               {cat}
             </button>
@@ -64,7 +69,7 @@ export function PosMenuColumn() {
         <div className="space-y-1">
           {filteredProducts.map((p, idx) => (
             <div
-              key={p.id}
+              key={p.productId}
               className="flex items-center rounded-lg bg-[var(--surface-2)] px-2 py-1.5 text-xs text-[var(--text)] hover:opacity-95"
             >
               <span className="w-8 text-[11px] text-[var(--muted)]">
@@ -72,7 +77,7 @@ export function PosMenuColumn() {
               </span>
               <div className="flex-1">
                 <div className="flex items-center gap-1">
-                  <span className="text-sm font-medium">{p.name}</span>
+                  <span className="text-sm font-medium">{p.productName}</span>
                   {p.tag && (
                     <span className="rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-medium text-emerald-300">
                       {p.tag}
@@ -80,24 +85,46 @@ export function PosMenuColumn() {
                   )}
                 </div>
                 <span className="text-[11px] text-[var(--muted)]">
-                  {p.category}
+                  {p.categoryName}
                 </span>
               </div>
-              <span className="w-20 text-right text-sm font-semibold text-emerald-400">
-                {p.price.toLocaleString('vi-VN')}đ
-              </span>
-              <button
-                type="button"
-                onClick={() => addProductToOrder(p.id)}
-                className="ml-2 w-14 rounded-full bg-emerald-500 py-1 text-[11px] font-semibold text-slate-950"
-              >
-                Thêm
-              </button>
+              {p.variants?.length > 1 ? (
+                <button
+                  onClick={() => setSelectedProduct(p)}
+                  className="ml-2 w-16 rounded-full bg-emerald-500 py-1 text-[11px] font-semibold text-slate-950"
+                >
+                  Chọn
+                </button>
+              ) : (
+                <button
+                  onClick={() =>
+                    addProductToOrder({
+                      productId: p.productId,
+                      productName: p.productName,
+                      base: p.variants[0],
+                      toppings: [],
+                      price: p.variants[0]?.price || 0,
+                    })
+                  }
+                  className="ml-2 w-16 rounded-full bg-emerald-500 py-1 text-[11px] font-semibold text-slate-950"
+                >
+                  Thêm
+                </button>
+              )}
             </div>
           ))}
+
         </div>
       </div>
+      {selectedProduct && (
+        <ProductOptionModal
+          product={selectedProduct}
+          onAdd={addProductToOrder}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
     </section>
+
   )
 }
 
