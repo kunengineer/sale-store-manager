@@ -91,6 +91,34 @@ public class OrderController {
                 ));
     }
 
+    @GetMapping("/table/{tableId}")
+    @Operation(
+            summary = "Get order by table id",
+            description = "Retrieve current order information by table id",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Order retrieved successfully",
+                            content = @Content(schema = @Schema(implementation = OrderResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "Order not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<APIResponse<OrderResponse>> getOrderByTable(
+            @PathVariable Integer tableId,
+            HttpServletRequest httpRequest) {
+
+        OrderResponse response = orderService.getByTable(tableId);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Order retrieved successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
+    }
+
     // =========================
     // UPDATE ORDER
     // =========================
