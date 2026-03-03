@@ -4,6 +4,7 @@ import { MOCK_ORDERS_BY_TABLE, MOCK_PRODUCTS } from '../data/mockPosData'
 import { useStore } from '../store/StoreContext'
 import { getStoreLayout } from '../data/services/storeZoneApi'
 import { getProducts } from '../data/services/productService'
+import { getOpenOrderByTable } from '../data/services/orderService'
 import { useQuery } from '@tanstack/react-query'
 
 const PosContext = createContext(null)
@@ -55,6 +56,7 @@ export function PosProvider({ children }) {
   const [activeAreaId, setActiveAreaId] = useState(null)
 
   // ====== SELECT TABLE ======
+  const [currentOrderId, setCurrentOrderId] = useState(null)
   const [selectedTableId, setSelectedTableId] = useState(null)
   const [orderItems, setOrderItems] = useState([])
 
@@ -77,51 +79,75 @@ export function PosProvider({ children }) {
     setOrderItems(hydrated)
   }
 
-  const selectTable = (tableId) => {
+
+  const selectTable = async (tableId) => {
     setSelectedTableId(tableId)
-    hydrateOrderFromMock(tableId)
+    setOrderItems([])
+    setCurrentOrderId(null)
+
+    try {
+      const order = await getOpenOrderByTable(tableId)
+      console.log('Lấy order mở của bàn', tableId, ':', order)
+      if (order) {
+        setCurrentOrderId(order.data.orderId)
+        setOrderItems(
+          (order.data.orderItems ?? []).map((item) => ({
+            id:          item.orderItemId,  // key FE
+            orderItemId: item.orderItemId,  // đánh dấu đã có trên BE
+            productName: item.productName,
+            base:        item.base,
+            toppings:    item.toppings ?? [],
+            note:        item.note ?? '',
+            qty:         item.quantity,
+            price:       item.unitPrice,
+          }))
+        )
+      }
+    } catch (err) {
+      if (err?.status !== 404) console.error('Lỗi load order:', err)
+      // 404 = bàn trống → bình thường
+    }
   }
 
   // ====== ORDER ACTIONS ======
   const addProductToOrder = (item) => {
-    setOrderItems(prev => [
+    setOrderItems((prev) => [
       ...prev,
-      {
-        id: Date.now(),
-        ...item,
-        qty: 1,
-      }
+      { id: Date.now(), ...item, qty: 1 },
+      // id = Date.now(), KHÔNG có orderItemId → FE biết đây là item mới
     ])
   }
 
   const changeItemQty = (id, delta) => {
-    setOrderItems(prev =>
-      prev
-        .map(i =>
-          i.id === id ? { ...i, qty: i.qty + delta } : i
-        )
-        .filter(i => i.qty > 0)
+    setOrderItems((prev) =>
+      prev.map((i) => i.id === id ? { ...i, qty: i.qty + delta } : i)
+          .filter((i) => i.qty > 0)
     )
   }
 
-  const subtotal = orderItems.reduce(
+  const updateItemNote = (id, note) => {
+  setOrderItems((prev) =>
+    prev.map((i) => i.id === id ? { ...i, note } : i)
+  )
+}
+
+  const subtotal = useMemo(
+    () => orderItems.reduce((sum, i) => sum + i.price * i.qty, 0),
+    [orderItems],
+  )
+
+  /* const subtotal = orderItems.reduce(
     (sum, item) => sum + item.price * item.qty,
     0,
-  )
+  ) */
 
   // ====== CONTEXT VALUE ======
   const value = {
-    areas,
-    tables: allTables,        // tất cả bàn đã map từ API
-    activeAreaId,
-    setActiveAreaId,
-    selectedTable,
-    selectTable,
+    areas, tables: allTables, activeAreaId, setActiveAreaId,
+    selectedTable, selectTable,
     products: productData?.data ?? [],
-    orderItems,
-    addProductToOrder,
-    changeItemQty,
-    subtotal,
+    orderItems, addProductToOrder, changeItemQty, subtotal,
+    currentOrderId, setCurrentOrderId, updateItemNote // ← expose ra ngoài
   }
   console.log(orderItems)
 
