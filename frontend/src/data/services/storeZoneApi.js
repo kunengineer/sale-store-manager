@@ -8,3 +8,15 @@ export const getStoreLayout = async (storeId) => {
     params: { storeId },
   })
 }
+
+// POST /store-zones
+// payload: { storeId, zoneName, zoneType, capacity, isActive }
+export const createZone = async (payload) => {
+  return await axiosInstance.post(STORE_ZONE_API, payload)
+}
+
+// PUT /store-zones/:id
+// payload: { storeId, zoneName, zoneType, capacity, isActive }
+export const updateZone = async (id, payload) => {
+  return await axiosInstance.put(`${STORE_ZONE_API}/${id}`, payload)
+}
