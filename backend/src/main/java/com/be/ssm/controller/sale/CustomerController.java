@@ -1,7 +1,9 @@
 package com.be.ssm.controller.sale;
 
 import com.be.ssm.dto.common.APIResponse;
+import com.be.ssm.dto.common.PageDTO;
 import com.be.ssm.dto.request.sale.CustomerCreateRequest;
+import com.be.ssm.dto.request.sale.CustomerFilerRequest;
 import com.be.ssm.dto.request.sale.CustomerUpdateRequest;
 import com.be.ssm.dto.response.sale.CustomerResponse;
 import com.be.ssm.service.sale.CustomerService;
@@ -115,5 +117,31 @@ public class CustomerController {
                         null,
                         httpRequest.getRequestURI()
                 ));
+    }
+
+    @GetMapping("/filter")
+    @Operation(
+            summary = "Filter & get customers",
+            description = "Retrieve list of customers with filter and pagination"
+    )
+    public ResponseEntity<APIResponse<PageDTO<CustomerResponse>>> filter(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @ModelAttribute CustomerFilerRequest filter,
+            HttpServletRequest httpRequest
+    ) {
+
+        PageDTO<CustomerResponse> response =
+                customerService.filteṛ(filter, page, size);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Customers retrieved successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
     }
 }

@@ -1,5 +1,6 @@
 package com.be.ssm.entities.sales;
 
+import com.be.ssm.entities.store.Stores;
 import com.be.ssm.enums.sales.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,7 +9,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Data
 @Builder
@@ -46,11 +49,26 @@ public class Customers {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id", nullable = false)
+    private Stores store;
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
+        this.customerCode = buildCustomerCode();
         if (this.loyaltyPoints == null) this.loyaltyPoints = 0;
         if (this.totalSpent == null) this.totalSpent = BigDecimal.ZERO;
+    }
+
+    private String buildCustomerCode() {
+        String date = LocalDate.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        String random = String.valueOf(
+                (int) (Math.random() * 900000) + 100000
+        );
+        return "CUS-" + date + "-" + random;
     }
 
 }
