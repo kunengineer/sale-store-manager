@@ -38,6 +38,6 @@ public class StoreZones {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
 
-    @OneToMany(mappedBy = "zone", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "zone")
     private List<StoreTables> tables;
 }

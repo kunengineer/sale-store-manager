@@ -13,4 +13,5 @@ public class StoreTableUpdateRequest {
     private String tableCode;
     private Integer seats;
     private TableStatus status;
+    private Boolean isActive;
 }

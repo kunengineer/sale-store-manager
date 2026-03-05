@@ -14,21 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class StoreTableCreateRequest {
-    @NotNull(message = "Zone id must not be null")
-    @Positive(message = "Zone id must be positive")
-    @Schema(example = "1")
     private Integer storeZoneId;
-
-    @NotBlank(message = "Table code must not be blank")
-    @Size(max = 20, message = "Table code must not exceed 20 characters")
-    @Schema(example = "TBL-01")
     private String tableCode;
-
-    @Positive(message = "Seats must be greater than 0")
-    @Schema(example = "4")
     private Integer seats;
-
-    @NotNull(message = "Table status must not be null")
-    @Schema(example = "AVAILABLE")
-    private TableStatus status;
 }

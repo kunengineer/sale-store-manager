@@ -55,6 +55,8 @@ public class StoreTableServiceImpl implements StoreTableService {
 
         StoreTables table = mapper.toStoreTableEntity(createRequest);
         table.setZone(zone);
+        table.setIsActive(false);
+        table.setStatus(TableStatus.MAINTENANCE);
 
         return mapper.toStoreTableResponse(repository.save(table));
     }
@@ -65,7 +67,7 @@ public class StoreTableServiceImpl implements StoreTableService {
         StoreZones zone = storeZonesRepository.findById(updateRequest.getStoreZoneId())
                 .orElseThrow();
 
-        isDuplicateTableCode(zone.getZoneId(), updateRequest.getTableCode());
+        isDuplicateTableCodeCheckForUpdate(tableId, zone.getZoneId(), updateRequest.getTableCode());
 
         StoreTables table = findById(tableId);
         table.setZone(zone);
@@ -125,10 +127,21 @@ public class StoreTableServiceImpl implements StoreTableService {
     }
 
     private void isDuplicateTableCode(Integer zoneId, String tableCode) {
+
         if (repository.existsByZoneZoneIdAndTableCode(
                 zoneId,
-                tableCode)) {
+                tableCode) == 1) {
 
+            throw new DuplicateRequestException(
+                    String.format("Table code '%s' already exists in zone %d",
+                            tableCode,
+                            zoneId)
+            );
+        }
+    }
+
+    private void isDuplicateTableCodeCheckForUpdate(Integer tableId, Integer zoneId, String tableCode) {
+        if(repository.existsTableCodeForUpdate(tableId, zoneId, tableCode) == 1){
             throw new DuplicateRequestException(
                     String.format("Table code '%s' already exists in zone %d",
                             tableCode,
