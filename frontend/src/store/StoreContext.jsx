@@ -34,7 +34,6 @@ export function StoreProvider({ children }) {
           setStores([])
           setCurrentStoreId(null)
           return
-          return
         }
 
         setStores(res.data)
