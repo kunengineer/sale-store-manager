@@ -1,80 +1,73 @@
-import { useMemo, useState } from 'react'
-
-const INITIAL_PRODUCTS = [
-  {
-    id: 'p1',
-    name: 'Cà phê sữa đá',
-    category: 'Cafe',
-    type: 'Món uống',
-    price: 32000,
-    status: 'active',
-  },
-  {
-    id: 'p2',
-    name: 'Trà đào cam sả',
-    category: 'Trà',
-    type: 'Món uống',
-    price: 39000,
-    status: 'active',
-  },
-]
+import { useMemo, useState, useEffect } from "react";
+import { getProducts } from "../data/services/productService";
+import { useStore } from "../store/StoreContext";
 
 export function ProductsPage() {
-  const [products, setProducts] = useState(INITIAL_PRODUCTS)
-  const [search, setSearch] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState('Tất cả')
-  const [statusFilter, setStatusFilter] = useState('Đang bán')
-  const [showForm, setShowForm] = useState(false)
+  const { currentStoreId } = useStore();
+  const [products, setProducts] = useState([]);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("Tất cả");
+  const [statusFilter, setStatusFilter] = useState("Tất cả");
+  const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    name: '',
-    category: 'Cafe',
-    type: 'Món uống',
-    price: '',
-    status: 'active',
-  })
+    name: "",
+    category: "Cafe",
+    type: "Món uống",
+    price: "",
+    status: "active",
+  });
 
-  const filtered = useMemo(
-    () =>
-      products.filter((p) => {
-        const matchSearch = p.name
-          .toLowerCase()
-          .includes(search.trim().toLowerCase())
-        const matchCategory =
-          categoryFilter === 'Tất cả' || p.category === categoryFilter
-        const matchStatus =
-          statusFilter === 'Tất cả'
-            ? true
-            : statusFilter === 'Đang bán'
-              ? p.status === 'active'
-              : p.status !== 'active'
-        return matchSearch && matchCategory && matchStatus
-      }),
-    [products, search, categoryFilter, statusFilter],
-  )
+  useEffect(() => {
+    if (currentStoreId) {
+      loadProducts();
+    }
+  }, [currentStoreId]);
+
+  const loadProducts = async () => {
+    try {
+      const res = await getProducts(currentStoreId);
+      setProducts(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const filtered = useMemo(() => {
+    return products.filter((p) => {
+      const matchSearch = p.productName
+        ?.toLowerCase()
+        .includes(search.toLowerCase());
+
+      const matchCategory =
+        categoryFilter === "Tất cả" || p.categoryName === categoryFilter;
+
+      return matchSearch && matchCategory;
+    });
+  }, [products, search, categoryFilter]);
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    if (!form.name || !form.price) return
+    e.preventDefault();
+    if (!form.name || !form.price) return;
     setProducts((prev) => [
       ...prev,
       {
         id: crypto.randomUUID(),
         name: form.name,
         category: form.category,
-        type: form.type || 'Món',
+        type: form.type || "Món",
         price: Number(form.price) || 0,
         status: form.status,
       },
-    ])
+    ]);
     setForm({
-      name: '',
-      category: 'Cafe',
-      type: 'Món uống',
-      price: '',
-      status: 'active',
-    })
-    setShowForm(false)
-  }
+      name: "",
+      category: "Cafe",
+      type: "Món uống",
+      price: "",
+      status: "active",
+    });
+    setShowForm(false);
+  };
 
   return (
     <div className="h-[calc(100vh-3.5rem)] overflow-auto px-4 py-3">
@@ -196,27 +189,46 @@ export function ProductsPage() {
           </thead>
           <tbody className="divide-y divide-[var(--border)]">
             {filtered.map((p) => (
-              <tr key={p.id}>
+              <tr key={p.productId}>
                 <td className="px-3 py-2">
                   <div className="flex items-center gap-2">
                     <div className="h-8 w-8 rounded-lg bg-[var(--surface-2)]" />
                     <div>
                       <p className="text-xs font-semibold text-[var(--text)]">
-                        {p.name}
+                        {p.productName}
                       </p>
-                      <p className="text-[11px] text-[var(--muted)]">{p.type}</p>
+                      <p className="text-[11px] text-[var(--muted)]">
+                        {p.type}
+                      </p>
+                      {/* variants */}
+                      <div className="mt-1 space-y-1 text-[11px] text-[var(--muted)]">
+                        {p.variants?.map((v) => (
+                          <div
+                            key={v.variantId}
+                            className="flex justify-between"
+                          >
+                            <span>{v.variantName}</span>
+
+                            <span className="text-emerald-400">
+                              {v.price.toLocaleString("vi-VN")}đ
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </td>
                 <td className="px-3 py-2 text-xs text-[var(--text)]">
-                  {p.category}
+                  {p.categoryName}
                 </td>
                 <td className="px-3 py-2 text-right text-xs font-semibold text-emerald-400">
-                  {p.price.toLocaleString('vi-VN')}đ
+                  {p.variants?.[0]?.price
+                    ? p.variants[0].price.toLocaleString("vi-VN") + "đ"
+                    : "-"}
                 </td>
                 <td className="px-3 py-2">
                   <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-300">
-                    {p.status === 'active' ? 'Đang bán' : 'Ngừng bán'}
+                    {p.status === "active" ? "Đang bán" : "Ngừng bán"}
                   </span>
                 </td>
                 <td className="px-3 py-2 text-right text-xs">
@@ -230,6 +242,5 @@ export function ProductsPage() {
         </table>
       </div>
     </div>
-  )
+  );
 }
-
