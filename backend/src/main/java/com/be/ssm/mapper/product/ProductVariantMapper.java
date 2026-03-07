@@ -21,4 +21,6 @@ public interface ProductVariantMapper {
             ProductVariantUpdateRequest request,
             @MappingTarget ProductVariants productVariant
     );
+
+
 }

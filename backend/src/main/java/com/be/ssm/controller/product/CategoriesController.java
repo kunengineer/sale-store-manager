@@ -109,7 +109,7 @@ public class CategoriesController {
                 ));
     }
 
-    @GetMapping("/stores/{storeId}/categories")
+    @GetMapping("/stores/{storeId}")
     public ResponseEntity<PageDTO<CategoriesResponse>> getAllCategories(
             @PathVariable Integer storeId,
             @RequestParam(defaultValue = "1") int page,

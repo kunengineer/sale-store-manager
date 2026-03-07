@@ -13,10 +13,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/product-variants")
@@ -28,6 +32,8 @@ public class ProductVariantController {
     public ResponseEntity<APIResponse<ProductVariantResponse>> create(
             @RequestBody @Valid ProductVariantCreateRequest request,
             HttpServletRequest httpRequest) {
+
+        log.info("Create product variant: {}", request);
 
         ProductVariantResponse response = productVariantService.create(request);
 
@@ -75,4 +81,21 @@ public class ProductVariantController {
                         httpRequest.getRequestURI()
                 ));
     }
+
+    @GetMapping("/all/{productId}")
+    public ResponseEntity<APIResponse<List<ProductVariantResponse>>> getAll(
+            @PathVariable Integer productId,
+            HttpServletRequest httpRequest
+    ){
+        List<ProductVariantResponse> response = productVariantService.findAll(productId);
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Product variant updated successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                ));
+    }
+
 }

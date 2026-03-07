@@ -18,7 +18,7 @@ public interface ProductService {
 
     ProductResponse update(ProductUpdateRequest request, Integer productId);
 
-    PageDTO<ProductResponse> getAll(Integer storeId, int page, int size, ProductFilter filter);
+    PageDTO<ProductResponse> getAll(int page, int size, ProductFilter filter);
 
 //     void decreaseStock(Integer productId, int quantity);
 

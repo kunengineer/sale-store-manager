@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 @Data
 public class ProductFilter {
+    private Integer storeId;
     private Integer categoryId;
     private Boolean isActive;
     private String keyword; // tìm theo productName hoặc productCode

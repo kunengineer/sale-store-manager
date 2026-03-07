@@ -9,11 +9,13 @@ import com.be.ssm.dto.response.product.PosVariantResponse;
 import com.be.ssm.dto.response.product.ProductResponse;
 import com.be.ssm.entities.product.Categories;
 import com.be.ssm.entities.product.Products;
+import com.be.ssm.entities.store.Stores;
 import com.be.ssm.exceptions.CustomException;
 import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.product.ProductMapper;
 import com.be.ssm.repository.product.CategoriesRepository;
 import com.be.ssm.repository.product.ProductsRepository;
+import com.be.ssm.repository.store.StoresRepository;
 import com.be.ssm.service.product.CategoriesService;
 import com.be.ssm.service.product.PosProductProjection;
 import com.be.ssm.service.product.ProductService;
@@ -35,6 +37,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductsRepository repository;
     private final ProductMapper mapper;
     private final CategoriesRepository categoriesRepository;
+    private final StoresRepository storesRepository;
 
 
     @Override
@@ -48,8 +51,11 @@ public class ProductServiceImpl implements ProductService {
         Categories category = categoriesRepository.findById(request.getCategoryId())
                 .orElseThrow();
 
+        Stores store = findStoreById(request.getStoreId());
+
         Products product = mapper.toProductEntity(request);
         product.setCategory(category);
+        product.setStore(store);
 
         return mapper.toProductResponse(repository.save(product));
     }
@@ -62,10 +68,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PageDTO<ProductResponse> getAll(Integer storeId, int page, int size, ProductFilter filter) {
+    public PageDTO<ProductResponse> getAll(int page, int size, ProductFilter filter) {
         Specification<Products> specification =
-                ProductSpecification.filter(filter)
-                        .and(ProductSpecification.byStore(storeId));
+                ProductSpecification.filter(filter);
         Pageable pageable = PageRequest.of(page - 1, size);
         return mapper.toPageDTO(repository.findAll(specification, pageable));
     }
@@ -105,5 +110,10 @@ public class ProductServiceImpl implements ProductService {
     private Products findById(Integer id) {
         return repository.findById(id)
                 .orElseThrow(()-> new CustomException(Error.PRODUCT_NOT_FOUND));
+    }
+
+    private Stores findStoreById(Integer id){
+        return storesRepository.findById(id)
+                .orElseThrow(()-> new CustomException(Error.STORE_NOT_FOUND));
     }
 }
