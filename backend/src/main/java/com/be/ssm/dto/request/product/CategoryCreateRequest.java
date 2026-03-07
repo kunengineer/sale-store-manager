@@ -24,4 +24,7 @@ public class CategoryCreateRequest {
 
     @Schema(example = "https://cdn.example.com/images/categories/coffee.png")
     private String imageUrl;
+
+    @Schema(example = "1")
+    private Integer storeId;
 }

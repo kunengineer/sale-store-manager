@@ -113,19 +113,20 @@ public class ProductController {
                 ));
     }
 
-    @GetMapping
+    @GetMapping("/pos")
     @Operation(
             summary = "Filter & get products",
             description = "Retrieve list of products with filter and pagination"
     )
     public ResponseEntity<APIResponse<PageDTO<ProductResponse>>> getAll(
+            @RequestParam Integer storeId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @ModelAttribute ProductFilter filter,
             HttpServletRequest httpRequest
     ) {
 
-        PageDTO<ProductResponse> response = productService.getAll(page, size, filter);
+        PageDTO<ProductResponse> response = productService.getAll(storeId, page, size, filter);
 
         return ResponseEntity.ok(
                 new APIResponse<>(

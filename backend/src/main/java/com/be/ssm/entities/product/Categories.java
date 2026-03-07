@@ -1,5 +1,6 @@
 package com.be.ssm.entities.product;
 
+import com.be.ssm.entities.store.Stores;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,6 +38,10 @@ public class Categories {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id", nullable = false)
+    private Stores store;
 
     @PrePersist
     public void prePersist() {

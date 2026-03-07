@@ -20,10 +20,25 @@ public class CategorySpecification {
                 return cb.conjunction();
             }
 
+            // storeId
+            if (filter.getStoreId() != null) {
+                predicates.add(
+                        cb.equal(
+                                root.get("store").get("storeId"),
+                                filter.getStoreId()
+                        )
+                );
+            }
+
             // parentId
             if (filter.getParentId() != null) {
-                Join<Object, Object> parentJoin = root.join("parent", JoinType.LEFT);
-                predicates.add(cb.equal(parentJoin.get("id"), filter.getParentId()));
+
+                predicates.add(
+                        cb.equal(
+                                root.get("parent").get("categoryId"),
+                                filter.getParentId()
+                        )
+                );
             }
 
             // categoryName LIKE
@@ -41,7 +56,7 @@ public class CategorySpecification {
                 predicates.add(cb.equal(root.get("isActive"), filter.getIsActive()));
             }
 
-            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+            return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 }

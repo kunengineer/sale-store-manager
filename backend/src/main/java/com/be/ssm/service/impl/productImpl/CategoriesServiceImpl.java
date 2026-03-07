@@ -15,6 +15,7 @@ import com.be.ssm.specification.CategorySpecification;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +31,8 @@ public class CategoriesServiceImpl implements CategoriesService {
 
     @Override
     public CategoriesResponse create(CategoryCreateRequest request) {
-        if (repository.existsByCategoryName(request.getCategoryName())) {
-            // Handle duplicate category name case, e.g., throw an exception or return an error response
+        if (repository.existsByCategoryNameAndStoreStoreId(request.getCategoryName(), request.getStoreId())) {
+            throw new CustomException(Error.CATEGORY_NAME_ALREADY_EXISTS);
         }
         Categories category = mapper.toCategoriesEntity(request);
         return mapper.toCategoriesResponse(repository.save(category));
@@ -47,7 +48,7 @@ public class CategoriesServiceImpl implements CategoriesService {
     @Override
     public PageDTO<CategoriesResponse> getAllCategories(int page, int size, CategoryFilter filter) {
         Specification<Categories> specification = CategorySpecification.filter(filter);
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("sortOrder").ascending());
         return mapper.toPageDTO(repository.findAll(specification, pageable));
     }
 

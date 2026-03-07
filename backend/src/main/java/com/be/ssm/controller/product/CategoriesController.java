@@ -109,8 +109,9 @@ public class CategoriesController {
                 ));
     }
 
-    @GetMapping
+    @GetMapping("/stores/{storeId}/categories")
     public ResponseEntity<PageDTO<CategoriesResponse>> getAllCategories(
+            @PathVariable Integer storeId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
 
@@ -123,6 +124,7 @@ public class CategoriesController {
         filter.setParentId(parentId);
         filter.setCategoryName(categoryName);
         filter.setIsActive(isActive);
+        filter.setStoreId(storeId);
 
         PageDTO<CategoriesResponse> result =
                 categoriesService.getAllCategories(page, size, filter);

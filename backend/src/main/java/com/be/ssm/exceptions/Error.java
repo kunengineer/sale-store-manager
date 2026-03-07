@@ -59,6 +59,7 @@ public enum Error {
 
         // Categories errors
         CATEGORIES_NOT_FOUND(6001, "Categories not found", HttpStatus.NOT_FOUND),
+        CATEGORY_NAME_ALREADY_EXISTS(6002, "Category already exists", HttpStatus.CONFLICT),
 
         // Products errors
         PRODUCT_NOT_FOUND(7001, "Product not found", HttpStatus.NOT_FOUND),

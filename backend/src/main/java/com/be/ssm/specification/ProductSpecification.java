@@ -2,6 +2,7 @@ package com.be.ssm.specification;
 
 import com.be.ssm.dto.filter.ProductFilter;
 import com.be.ssm.entities.product.Products;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -82,6 +83,18 @@ public class ProductSpecification {
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+    public static Specification<Products> byStore(Integer storeId) {
+        return (root, query, cb) -> {
+            if (storeId == null) {
+                return cb.conjunction();
+            }
+
+            return cb.equal(
+                    root.get("store").get("storeId"),
+                    storeId
+            );
         };
     }
 }
