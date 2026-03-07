@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { getProducts } from "../data/services/productService";
+import { getCategories } from "../data/services/categoryService";
 import { useStore } from "../store/StoreContext";
 
 export function ProductsPage() {
@@ -8,6 +9,7 @@ export function ProductsPage() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("Tất cả");
   const [statusFilter, setStatusFilter] = useState("Tất cả");
+  const [categories, setCategories] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -20,6 +22,7 @@ export function ProductsPage() {
   useEffect(() => {
     if (currentStoreId) {
       loadProducts();
+      loadCategories();
     }
   }, [currentStoreId]);
 
@@ -32,6 +35,11 @@ export function ProductsPage() {
     }
   };
 
+  const loadCategories = async () => {
+    const res = await getCategories(currentStoreId);
+    setCategories(res.content || []);
+  };
+
   const filtered = useMemo(() => {
     return products.filter((p) => {
       const matchSearch = p.productName
@@ -41,7 +49,12 @@ export function ProductsPage() {
       const matchCategory =
         categoryFilter === "Tất cả" || p.categoryName === categoryFilter;
 
-      return matchSearch && matchCategory;
+      const matchStatus =
+        statusFilter === "Tất cả" ||
+        (statusFilter === "Đang bán" && p.isActive) ||
+        (statusFilter === "Ngừng bán" && !p.isActive);
+
+      return matchSearch && matchCategory && matchStatus;
     });
   }, [products, search, categoryFilter]);
 
@@ -61,8 +74,7 @@ export function ProductsPage() {
     ]);
     setForm({
       name: "",
-      category: "Cafe",
-      type: "Món uống",
+      categoryId: "",
       price: "",
       status: "active",
     });
@@ -100,8 +112,11 @@ export function ProductsPage() {
           onChange={(e) => setCategoryFilter(e.target.value)}
         >
           <option value="Tất cả">Tất cả danh mục</option>
-          <option value="Cafe">Cafe</option>
-          <option value="Trà">Trà</option>
+          {categories?.map((c) => (
+            <option key={c.categoryId} value={c.categoryName}>
+              {c.categoryName}
+            </option>
+          ))}
         </select>
         <select
           className="rounded-lg border border-[var(--border)] bg-[var(--input)] px-2 py-2 text-xs text-[var(--text)]"
@@ -135,14 +150,16 @@ export function ProductsPage() {
             </label>
             <select
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--input)] px-2 py-1.5 text-xs text-[var(--text)]"
-              value={form.category}
+              value={form.categoryId}
               onChange={(e) =>
                 setForm((f) => ({ ...f, category: e.target.value }))
               }
             >
-              <option value="Cafe">Cafe</option>
-              <option value="Trà">Trà</option>
-              <option value="Khác">Khác</option>
+              {categories.map((c) => (
+                <option key={c.categoryId} value={c.categoryId}>
+                  {c.categoryName}
+                </option>
+              ))}
             </select>
           </div>
           <div>
@@ -227,8 +244,14 @@ export function ProductsPage() {
                     : "-"}
                 </td>
                 <td className="px-3 py-2">
-                  <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] text-emerald-300">
-                    {p.status === "active" ? "Đang bán" : "Ngừng bán"}
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[11px] ${
+                      p.isActive
+                        ? "bg-emerald-500/10 text-emerald-300"
+                        : "bg-red-500/10 text-red-300"
+                    }`}
+                  >
+                    {p.isActive ? "Đang bán" : "Ngừng bán"}
                   </span>
                 </td>
                 <td className="px-3 py-2 text-right text-xs">
