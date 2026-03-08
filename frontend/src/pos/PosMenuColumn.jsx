@@ -13,6 +13,7 @@ export function PosMenuColumn() {
     const set = new Set(products.map(p => p.categoryName))
     return ['Tất cả', ...Array.from(set)]
   }, [products])
+  console.log('Products:', products)
 
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {

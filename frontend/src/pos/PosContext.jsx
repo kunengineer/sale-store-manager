@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { MOCK_ORDERS_BY_TABLE, MOCK_PRODUCTS } from '../data/mockPosData'
 import { useStore } from '../store/StoreContext'
 import { getStoreLayout } from '../data/services/storeZoneApi'
-import { getProducts } from '../data/services/productService'
+import { getProductsForPos } from '../data/services/productService'
 import { getOpenOrderByTable } from '../data/services/orderService'
 import { useQuery } from '@tanstack/react-query'
 
@@ -22,7 +22,7 @@ export function PosProvider({ children }) {
 
   const { data: productData } = useQuery({
     queryKey: ['posProducts', currentStoreId],
-    queryFn: () => getProducts(currentStoreId),
+    queryFn: () => getProductsForPos(currentStoreId),
     enabled: !!currentStoreId,
     staleTime: 1000 * 60 * 5,
   })
