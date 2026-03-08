@@ -64,8 +64,7 @@ export function PosMenuColumn() {
         <div className="mb-2 flex items-center text-[11px] text-[var(--muted)]">
           <span className="w-8">STT</span>
           <span className="flex-1">Tên món</span>
-          <span className="w-20 text-right">Giá</span>
-          <span className="w-14 text-center">Thêm</span>
+          <span className="w-20 text-right">Tùy chọn</span>
         </div>
         <div className="space-y-1">
           {filteredProducts.map((p, idx) => (
