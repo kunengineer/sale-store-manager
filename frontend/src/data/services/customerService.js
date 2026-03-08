@@ -2,6 +2,15 @@ import axiosInstance from '../axiosConfig'
 
 const CUSTOMER_API = '/customers'
 
+// POS SEARCH CUSTOMER
+export const searchCustomersPOS = async ({ keyword, storeId }) => {
+  const params = { storeId }
+
+  if (keyword?.trim()) params.keyword = keyword.trim()
+
+  return await axiosInstance.get(`${CUSTOMER_API}/pos-search`, { params })
+}
+
 // GET /customers/filter?fullName=...&storeId=...&page=1&size=20
 // Lưu ý: @ModelAttribute + @Getter → chỉ gửi field có giá trị, bỏ qua null/undefined
 export const getCustomers = async ({ page = 1, size = 20, fullName, customerCode, storeId } = {}) => {
