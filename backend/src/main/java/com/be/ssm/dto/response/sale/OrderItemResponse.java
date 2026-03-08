@@ -11,6 +11,8 @@ public class OrderItemResponse {
     private Integer orderItemId;
     private Integer orderId;
     private Integer variantId;
+    private String variantName;
+    private String productName;
     private Integer quantity;
     private BigDecimal unitPrice;
     private BigDecimal discountPct;

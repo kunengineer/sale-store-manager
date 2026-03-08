@@ -10,6 +10,8 @@ import org.mapstruct.*;
 public interface OrderItemMapper {
 
     @Mapping(target = "variantId", expression = "java(getVariantId(orderItems))")
+    @Mapping(target = "variantName", source = "productVariants.variantName")
+    @Mapping(target = "productName", source = "productVariants.product.productName")
     OrderItemResponse toOrderItemResponse(OrderItems orderItems);
 
     default Integer getVariantId(OrderItems orderItems) {

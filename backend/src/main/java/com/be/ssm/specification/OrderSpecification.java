@@ -2,6 +2,9 @@ package com.be.ssm.specification;
 
 import com.be.ssm.dto.filter.OrderFilter;
 import com.be.ssm.entities.sales.Orders;
+import com.be.ssm.entities.store.StoreTables;
+import com.be.ssm.entities.store.StoreZones;
+import com.be.ssm.entities.store.Stores;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -38,7 +41,7 @@ public class OrderSpecification {
 
             // customerId
             if (filter.getCustomerId() != null) {
-                Join<Object, Object> customerJoin = root.join("customer", JoinType.LEFT);
+                Join<Object, Object> customerJoin = root.join("customers", JoinType.LEFT);
                 predicates.add(cb.equal(customerJoin.get("id"), filter.getCustomerId()));
             }
 
@@ -48,9 +51,15 @@ public class OrderSpecification {
             }
 
             // storeId
-            if (filter.getStoreId() != null) {
-                Join<Object, Object> storeJoin = root.join("store", JoinType.LEFT);
-                predicates.add(cb.equal(storeJoin.get("id"), filter.getStoreId()));
+            if (filter.getStoreId() != null && filter.getStoreId() > 0) {
+
+                Join<Orders, StoreTables> tableJoin = root.join("storeTables", JoinType.LEFT);
+                Join<StoreTables, StoreZones> zoneJoin = tableJoin.join("zone", JoinType.LEFT);
+                Join<StoreZones, Stores> storeJoin = zoneJoin.join("store", JoinType.LEFT);
+
+                predicates.add(
+                        cb.equal(storeJoin.get("storeId"), filter.getStoreId())
+                );
             }
 
             // fromDate (>= createdAt)

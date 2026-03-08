@@ -5,14 +5,13 @@ import com.be.ssm.dto.request.product.ProductCreateRequest;
 import com.be.ssm.dto.request.product.ProductUpdateRequest;
 import com.be.ssm.dto.response.product.ProductResponse;
 import com.be.ssm.entities.product.Products;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
+
+    @Mapping(target = "categoryName", source = "category.categoryName")
     ProductResponse toProductResponse(Products product);
 
     Products toProductEntity(ProductCreateRequest request);

@@ -185,7 +185,7 @@ public class OrderController {
         );
     }
 
-    @GetMapping
+    @GetMapping("/filter")
     @Operation(
             summary = "Filter & get orders",
             description = "Retrieve list of orders with filter and pagination"
