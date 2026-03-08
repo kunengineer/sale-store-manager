@@ -6,6 +6,7 @@ import com.be.ssm.dto.request.sale.CustomerCreateRequest;
 import com.be.ssm.dto.request.sale.CustomerFilerRequest;
 import com.be.ssm.dto.request.sale.CustomerUpdateRequest;
 import com.be.ssm.dto.response.sale.CustomerResponse;
+import com.be.ssm.dto.response.sale.PosCustomerResponse;
 import com.be.ssm.service.sale.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -132,7 +135,7 @@ public class CustomerController {
     ) {
 
         PageDTO<CustomerResponse> response =
-                customerService.filteṛ(filter, page, size);
+                customerService.filter(filter, page, size);
 
         return ResponseEntity.ok(
                 new APIResponse<>(
@@ -144,4 +147,32 @@ public class CustomerController {
                 )
         );
     }
+
+    // =========================
+// POS SEARCH CUSTOMER
+// =========================
+    @GetMapping("/pos-search")
+    @Operation(
+            summary = "Search customers for POS",
+            description = "Search customers quickly for POS without pagination"
+    )
+    public ResponseEntity<APIResponse<List<PosCustomerResponse>>> filterPos(
+            @ModelAttribute CustomerFilerRequest filter,
+            HttpServletRequest httpRequest
+    ) {
+
+        List<PosCustomerResponse> response =
+                customerService.filterPos(filter);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Customers retrieved successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
+    }
+
 }

@@ -5,6 +5,7 @@ import com.be.ssm.dto.request.sale.CustomerCreateRequest;
 import com.be.ssm.dto.request.sale.CustomerFilerRequest;
 import com.be.ssm.dto.request.sale.CustomerUpdateRequest;
 import com.be.ssm.dto.response.sale.CustomerResponse;
+import com.be.ssm.dto.response.sale.PosCustomerResponse;
 import com.be.ssm.entities.sales.Customers;
 import com.be.ssm.entities.store.Stores;
 import com.be.ssm.exceptions.CustomException;
@@ -64,7 +65,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public PageDTO<CustomerResponse> filteṛ(CustomerFilerRequest request, int page, int size) {
+    public PageDTO<CustomerResponse> filter(CustomerFilerRequest request, int page, int size) {
         // Page bắt đầu từ 1 ở API → convert về 0-based
         int pageIndex = Math.max(page - 1, 0);
 
@@ -94,6 +95,15 @@ public class CustomerServiceImpl implements CustomerService {
 
         return repository.findById(id)
                 .orElseThrow(()-> new CustomException(Error.CUSTOMER_NOT_FOUND));
+    }
+
+    @Override
+    public List<PosCustomerResponse> filterPos(CustomerFilerRequest request) {
+        return repository.findAll(
+                CustomerSpecification.filter(request)
+        ).stream()
+                .map(mapper::toPosCustomerResponse)
+                .toList();
     }
 
 }

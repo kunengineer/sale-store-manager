@@ -24,33 +24,17 @@ public class CustomerSpecification {
             List<Predicate> predicates = new ArrayList<>();
 
             // =========================
-            // CUSTOMER CODE (LIKE - case insensitive)
+            // SEARCH KEYWORD (CODE / NAME / PHONE)
             // =========================
-            if (StringUtils.hasText(filter.getCustomerCode())) {
+            if (StringUtils.hasText(filter.getKeyword())) {
 
-                String keyword = filter.getCustomerCode().trim().toLowerCase();
+                String keyword = filter.getKeyword().toLowerCase();
 
-                predicates.add(
-                        cb.like(
-                                cb.lower(root.get("customerCode")),
-                                "%" + keyword + "%"
-                        )
-                );
-            }
+                Predicate codeLike = cb.like(cb.lower(root.get("customerCode")), "%" + keyword + "%");
+                Predicate nameLike = cb.like(cb.lower(root.get("fullName")), "%" + keyword + "%");
+                Predicate phoneLike = cb.like(cb.lower(root.get("phone")), "%" + keyword + "%");
 
-            // =========================
-            // FULL NAME (LIKE - case insensitive)
-            // =========================
-            if (StringUtils.hasText(filter.getFullName())) {
-
-                String keyword = filter.getFullName().trim().toLowerCase();
-
-                predicates.add(
-                        cb.like(
-                                cb.lower(root.get("fullName")),
-                                "%" + keyword + "%"
-                        )
-                );
+                predicates.add(cb.or(codeLike, nameLike, phoneLike));
             }
 
             // =========================

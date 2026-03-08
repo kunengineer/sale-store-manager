@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomerFilerRequest {
-    private String customerCode;
-    private String fullName;
+    private String keyword;
     private Integer storeId;
 }
