@@ -7,6 +7,7 @@ import CustomerSearchBox from "./CustomerSearchBox";
 function PaymentModal({
   open,
   onClose,
+  subtotal,
   total,
   customerPaid,
   onChangeCustomerPaid,
@@ -15,81 +16,104 @@ function PaymentModal({
   surcharge,
   onChangeSurcharge,
   change,
+  paymentMethod,
+  onChangePaymentMethod,
 }) {
   if (!open) return null;
+  const canPay = customerPaid >= total;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-lg rounded-xl border border-[var(--border)] bg-[var(--surface-solid)] p-4 text-[var(--text)] shadow-xl">
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-slate-50">
+            <h2 className="text-sm font-semibold text-[var(--text)]">
               Thanh toán hóa đơn
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[var(--muted)]">
               Tổng {total.toLocaleString("vi-VN")}đ
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-slate-700 px-2 py-1 text-xs text-slate-300 hover:border-emerald-500"
+            className="rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1 text-xs text-[var(--text)] hover:border-emerald-500 hover:bg-emerald-500/10 transition"
           >
             Đóng
           </button>
         </div>
         <div className="grid gap-4 md:grid-cols-[1.2fr,1fr]">
           <div className="space-y-3">
-            <label className="block text-xs text-slate-300">
+            <label className="block text-xs text-[var(--text)]">
               Số tiền khách đưa
               <input
                 autoFocus
-                type="number"
-                value={customerPaid}
+                type="text"
+                inputMode="numeric"
+                value={customerPaid ? customerPaid.toLocaleString("vi-VN") : ""}
                 onChange={(e) =>
-                  onChangeCustomerPaid(Number(e.target.value) || 0)
+                  onChangeCustomerPaid(parseMoney(e.target.value))
                 }
-                className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--input)] px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-2)]
+  px-3 py-2 text-sm text-right font-semibold text-[var(--text)]
+  placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 placeholder="Nhập số tiền..."
               />
             </label>
+
             <div className="flex gap-2 text-xs">
               <label className="flex-1">
-                <span className="mb-1 block text-[11px] text-slate-300">
+                <span className="mb-1 block text-[11px] text-[var(--text)]">
                   Giảm giá
                 </span>
                 <input
-                  type="number"
-                  value={discount}
+                  type="text"
+                  inputMode="numeric"
+                  min="0"
+                  max={total}
+                  value={discount === 0 ? "" : discount}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) =>
                     onChangeDiscount(Number(e.target.value) || 0)
                   }
-                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--input)] px-2 py-1.5 text-xs text-[var(--text)]"
+                  className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-2)]
+  px-3 py-2 text-sm text-right font-semibold text-[var(--text)]
+  placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   placeholder="0đ"
                 />
               </label>
               <label className="flex-1">
-                <span className="mb-1 block text-[11px] text-slate-300">
+                <span className="mb-1 block text-[11px] text-[var(--text)]">
                   Phụ thu
                 </span>
                 <input
                   type="number"
-                  value={surcharge}
+                  min="0"
+                  value={surcharge === 0 ? "" : surcharge}
+                  onFocus={(e) => e.target.select()}
                   onChange={(e) =>
-                    onChangeSurcharge(Number(e.target.value) || 0)
+                    onChangeSurcharge(
+                      Math.max(
+                        0,
+                        Math.min(1000000000, Number(e.target.value) || 0),
+                      ),
+                    )
                   }
-                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--input)] px-2 py-1.5 text-xs text-[var(--text)]"
+                  className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-2)]
+  px-3 py-2 text-sm text-right font-semibold text-[var(--text)]
+  placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   placeholder="0đ"
                 />
               </label>
             </div>
             <div className="flex flex-wrap gap-2">
-              {["50.000", "100.000", "200.000", "500.000"].map((val) => (
+              {[50000, 100000, 200000, 500000].map((val) => (
                 <button
                   key={val}
                   type="button"
-                  className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs text-slate-200 hover:border-emerald-500"
+                  onClick={() => onChangeCustomerPaid(val)}
+                  className="rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1 text-xs text-[var(--text)] hover:border-emerald-500 hover:bg-emerald-500/10 transition"
                 >
-                  {val}đ
+                  {val.toLocaleString("vi-VN")}đ
                 </button>
               ))}
             </div>
@@ -113,14 +137,14 @@ function PaymentModal({
               <span>Phụ thu</span>
               <span>{surcharge.toLocaleString("vi-VN")}đ</span>
             </div>
-            <div className="flex justify-between text-emerald-400">
+            <div className="flex justify-between text-emerald-600">
               <span>Tiền thừa</span>
               <span className="font-semibold">
                 {change.toLocaleString("vi-VN")}đ
               </span>
             </div>
             <div className="mt-3">
-              <span className="mb-1 block text-xs text-slate-400">
+              <span className="mb-1 block text-xs text-[var(--muted)]">
                 Phương thức thanh toán
               </span>
               <div className="flex flex-wrap gap-2">
@@ -128,7 +152,13 @@ function PaymentModal({
                   <button
                     key={m}
                     type="button"
-                    className="rounded-full border border-emerald-500/60 bg-emerald-500/10 px-3 py-1 text-[11px] text-emerald-200"
+                    onClick={() => onChangePaymentMethod(m)}
+                    className={`rounded-full border px-3 py-1 text-[11px] transition
+                              ${
+                                paymentMethod === m
+                                  ? "border-emerald-500 bg-emerald-500/20 text-emerald-600"
+                                  : "border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)] hover:border-emerald-500"
+                              }`}
                   >
                     {m}
                   </button>
@@ -148,13 +178,17 @@ function PaymentModal({
           <div className="flex gap-2">
             <button
               type="button"
-              className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-200"
+              disabled={!canPay}
+              className={`rounded-lg px-4 py-2 text-xs font-semibold
+                ${canPay ? "bg-emerald-600 text-white" : "bg-gray-400 cursor-not-allowed"}
+                `}
             >
               Thanh toán
             </button>
+
             <button
               type="button"
-              className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-950"
+              className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700 transition"
             >
               Thanh toán & In
             </button>
@@ -185,7 +219,7 @@ function ChangeTableModal({ open, onClose }) {
             Đóng
           </button>
         </div>
-        <p className="mb-2 text-[11px] text-slate-400">
+        <p className="mb-2 text-[11px] text-[var(--muted)]">
           Chọn bàn muốn chuyển hoá đơn hiện tại sang.
         </p>
         <div className="grid grid-cols-3 gap-2">
@@ -197,13 +231,13 @@ function ChangeTableModal({ open, onClose }) {
               className={`rounded-lg border px-2 py-1.5 text-left text-[11px] ${
                 selectedTable?.id === t.id
                   ? "border-emerald-500 bg-emerald-500/10"
-                  : "border-slate-700 bg-slate-900"
+                  : "border-[var(--border)] bg-[var(--surface-2)]"
               }`}
             >
-              <span className="block text-xs font-semibold text-slate-50">
+              <span className="block text-xs font-semibold text-[var(--text)]">
                 Bàn {t.name}
               </span>
-              <span className="block text-[10px] text-slate-400">
+              <span className="block text-[10px] text-[var(--muted)]">
                 {t.status === "using"
                   ? `Đang dùng · ${t.guests ?? 0} khách`
                   : t.status === "reserved"
@@ -224,6 +258,7 @@ function ChangeTableModal({ open, onClose }) {
 export function PosOrderColumn() {
   const [openPayment, setOpenPayment] = useState(false);
   const [openChangeTable, setOpenChangeTable] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("Tiền mặt");
 
   // Dữ liệu từ PosContext
   // selectedTable  : bàn đang được chọn ở cột trái
@@ -345,17 +380,24 @@ export function PosOrderColumn() {
     }
   };
 
+  const parseMoney = (value) => {
+    const raw = value.replace(/\D/g, "");
+    const num = Number(raw);
+    return Math.max(0, Math.min(1000000000, num || 0));
+  };
+
   // Biến tổng hợp — true = khoá Thanh toán, Gộp bàn, Chuyển bàn
   const isLocked = hasUnsaved;
 
   return (
     <>
       <section
-        className={`flex w-[28%] min-w-[260px] max-w-[360px] flex-col rounded-xl border ${
-          theme === "dark"
-            ? "border-[var(--border)] bg-[var(--surface)]"
-            : "border-[var(--border)] bg-[var(--surface-solid)]"
-        }`}
+        className={`flex h-full min-h-0 flex-col w-[28%] min-w-[260px] max-w-[360px] flex-col rounded-xl border
+  ${
+    theme === "dark"
+      ? "border-[var(--border)] bg-[var(--surface)]"
+      : "border-[var(--border)] bg-[var(--surface-solid)]"
+  }`}
       >
         {/* Header: tên bàn + nút đổi bàn */}
         <div className="flex items-start justify-between border-b border-[var(--border)] px-3 py-2">
@@ -365,7 +407,7 @@ export function PosOrderColumn() {
                 {selectedTable ? `Bàn ${selectedTable.name}` : "Chưa chọn bàn"}
               </p>
               {tableTimeText && (
-                <span className="inline-block rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">
+                <span className="inline-block rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-600">
                   {selectedTable.status === "using" ? "Mở lúc" : "Đặt lúc"}{" "}
                   {tableTimeText}
                 </span>
@@ -413,7 +455,7 @@ export function PosOrderColumn() {
         )}
 
         {/* Danh sách món */}
-        <div className="flex-1 divide-y divide-[var(--border)] overflow-auto">
+        <div className="flex-shrink-0 space-y-2 border-t border-[var(--border)] p-3 bg-[var(--surface)]">
           {orderItems.map((item) => (
             <div
               key={item.id}
@@ -464,7 +506,7 @@ export function PosOrderColumn() {
         </div>
 
         {/* Footer */}
-        <div className="space-y-2 border-t border-[var(--border)] p-3">
+        <div className="flex-shrink-0 space-y-2 border-t border-[var(--border)] p-3 bg-[var(--surface)]">
           {/* Nút phụ */}
           <div className="mb-2 flex flex-wrap gap-1 text-[10px]">
             {/* Gộp bàn — khoá khi unsaved */}
@@ -527,57 +569,141 @@ export function PosOrderColumn() {
             <label className="text-[11px] text-[var(--muted)]">
               Giảm giá
               <input
-                type="number"
-                className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--input)] px-2 py-1.5 text-xs text-[var(--text)]"
-                value={discount}
-                onChange={(e) => setDiscount(Number(e.target.value) || 0)}
+                type="text"
+                inputMode="numeric"
+                min="0"
+                max="1000000000"
+                step="1000"
+                value={discount ? discount.toLocaleString("vi-VN") : ""}
+                placeholder="0"
+                onFocus={(e) => e.target.select()}
+                onKeyDown={(e) => {
+                  if (e.key === "-" || e.key === "e") e.preventDefault();
+                }}
+                onChange={(e) => setDiscount(parseMoney(e.target.value))}
+                className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-2)]
+  px-3 py-2 text-sm text-right font-semibold text-[var(--text)]
+  placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </label>
             <label className="text-[11px] text-[var(--muted)]">
               Phụ thu
               <input
-                type="number"
-                className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--input)] px-2 py-1.5 text-xs text-[var(--text)]"
-                value={surcharge}
-                onChange={(e) => setSurcharge(Number(e.target.value) || 0)}
+                type="text"
+                inputMode="numeric"
+                min="0"
+                max="1000000000"
+                step="1000"
+                onFocus={(e) => e.target.select()}
+                className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-2)]
+  px-3 py-2 text-sm text-right font-semibold text-[var(--text)]
+  placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                value={surcharge ? surcharge.toLocaleString("vi-VN") : ""}
+                onChange={(e) => setSurcharge(parseMoney(e.target.value))}
+                onKeyDown={(e) => {
+                  if (e.key === "-" || e.key === "e") e.preventDefault();
+                }}
+                placeholder="0"
               />
             </label>
           </div>
 
-          <label className="block text-[11px] text-[var(--muted)]">
-            Khách đưa
-            <input
-              type="number"
-              className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--input)] px-2 py-1.5 text-xs text-[var(--text)]"
-              value={customerPaid}
-              onChange={(e) => setCustomerPaid(Number(e.target.value) || 0)}
-            />
-          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {/* Khách đưa */}
+            <label className="text-[11px] text-[var(--muted)]">
+              Khách đưa
+              <input
+                type="text"
+                inputMode="numeric"
+                onFocus={(e) => e.target.select()}
+                className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-2)]
+    px-3 py-2 text-sm text-right font-semibold text-[var(--text)]
+    placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                value={customerPaid ? customerPaid.toLocaleString("vi-VN") : ""}
+                placeholder="0"
+                onChange={(e) => setCustomerPaid(parseMoney(e.target.value))}
+              />
+            </label>
+
+            {/* Thối lại */}
+            <label className="text-[11px] text-[var(--muted)]">
+              Thối lại
+              <input
+                type="text"
+                value={change.toLocaleString("vi-VN") + "đ"}
+                disabled
+                className="mt-1 w-full rounded-lg border border-[var(--border)] bg-emerald-50 px-3 py-2 text-sm text-right font-semibold text-emerald-600"
+              />
+            </label>
+          </div>
+
+          {/* Quick cash buttons */}
+          <div className="mt-2 flex flex-wrap gap-1">
+            {/* Exact */}
+            <button
+              type="button"
+              onClick={() => setCustomerPaid(total)}
+              className="rounded-full border border-emerald-500 bg-emerald-500/10 px-3 py-1 text-[11px] font-medium text-emerald-600"
+            >
+              Exact
+            </button>
+
+            {/* Cash buttons */}
+            {[50000, 100000, 200000, 500000].map((amount) => (
+              <button
+                key={amount}
+                type="button"
+                onClick={() =>
+                  setCustomerPaid((prev) => Math.min(1000000000, prev + amount))
+                }
+                className="rounded-full border border-[var(--border)] bg-[var(--surface-2)]
+      px-3 py-1 text-[11px] font-medium hover:border-emerald-500 hover:bg-emerald-500/10 transition"
+              >
+                {amount.toLocaleString("vi-VN")}
+              </button>
+            ))}
+
+            {/* Clear */}
+            <button
+              type="button"
+              onClick={() => setCustomerPaid(0)}
+              className="rounded-full border border-red-400 px-3 py-1 text-[11px] font-medium text-red-500 hover:bg-red-500/10"
+            >
+              Clear
+            </button>
+          </div>
 
           {/* Tổng tiền */}
-          <div className="flex justify-between text-[11px] text-[var(--muted)]">
-            <span>Tạm tính</span>
-            <span>{subtotal.toLocaleString("vi-VN")}đ</span>
-          </div>
-          <div className="flex justify-between text-[11px] text-[var(--muted)]">
-            <span>Giảm giá</span>
-            <span>
-              {discount > 0 ? `-${discount.toLocaleString("vi-VN")}đ` : "0đ"}
-            </span>
-          </div>
-          <div className="flex justify-between text-[11px] text-[var(--muted)]">
-            <span>Phụ thu</span>
-            <span>
-              {surcharge > 0 ? `${surcharge.toLocaleString("vi-VN")}đ` : "0đ"}
-            </span>
-          </div>
-          <div className="mt-1 flex justify-between text-sm font-semibold text-emerald-500">
-            <span>Tổng thanh toán</span>
-            <span>{total.toLocaleString("vi-VN")}đ</span>
-          </div>
-          <div className="flex justify-between text-[11px] text-emerald-600">
-            <span>Thối lại</span>
-            <span>{change.toLocaleString("vi-VN")}đ</span>
+          <div className="space-y-2 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-3 text-xs text-[var(--muted)]">
+            <div className="flex justify-between">
+              <span>Tạm tính</span>
+              <span>{subtotal.toLocaleString("vi-VN")}đ</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Giảm giá</span>
+              <span>-{discount.toLocaleString("vi-VN")}đ</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Phụ thu</span>
+              <span>+{surcharge.toLocaleString("vi-VN")}đ</span>
+            </div>
+
+            <div className="flex justify-between text-emerald-600 font-semibold">
+              <span>Tổng thanh toán</span>
+              <span>{total.toLocaleString("vi-VN")}đ</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Khách đưa</span>
+              <span>{customerPaid.toLocaleString("vi-VN")}đ</span>
+            </div>
+
+            <div className="flex justify-between text-emerald-600">
+              <span>Thối lại</span>
+              <span>{change.toLocaleString("vi-VN")}đ</span>
+            </div>
           </div>
 
           {/* Nút chính */}
@@ -591,7 +717,9 @@ export function PosOrderColumn() {
               className={`flex-1 rounded-lg py-2 text-sm font-semibold transition-all duration-200 ${
                 isLocked
                   ? "cursor-not-allowed bg-slate-800 text-slate-600"
-                  : "bg-emerald-500 text-slate-950 hover:bg-emerald-400"
+                  : theme === "dark"
+                    ? "rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 transition-all duration-300"
+                    : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
               }`}
             >
               Thanh toán (F2)
@@ -604,7 +732,9 @@ export function PosOrderColumn() {
               disabled={draftLoading}
               className={`relative rounded-lg border px-3 text-xs font-semibold transition-all duration-300 ${
                 hasUnsaved
-                  ? "animate-pulse border-amber-500 bg-amber-500/10 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.3)]"
+                  ? theme === "dark"
+                    ? "animate-pulse border-amber-500 bg-amber-500/10 text-amber-400"
+                    : "border-amber-500 bg-amber-100 text-amber-700 shadow-sm"
                   : "border-[var(--border)] bg-[var(--surface-2)] text-[var(--text)]"
               } ${draftLoading ? "cursor-not-allowed opacity-60" : ""}`}
             >
@@ -633,6 +763,7 @@ export function PosOrderColumn() {
       <PaymentModal
         open={openPayment}
         onClose={() => setOpenPayment(false)}
+        subtotal={subtotal}
         total={total}
         customerPaid={customerPaid}
         onChangeCustomerPaid={setCustomerPaid}
@@ -641,6 +772,8 @@ export function PosOrderColumn() {
         surcharge={surcharge}
         onChangeSurcharge={setSurcharge}
         change={change}
+        paymentMethod={paymentMethod}
+        onChangePaymentMethod={setPaymentMethod}
       />
       <ChangeTableModal
         open={openChangeTable}
