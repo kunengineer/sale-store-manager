@@ -1,6 +1,7 @@
 import axiosInstance from '../axiosConfig'
 
 const ORDER_API = '/orders'
+const ORDER_ITEM_API = '/order-items'
 
 export const getOpenOrderByTable = async (tableId) => {
   return await axiosInstance.get(`${ORDER_API}/table/${tableId}`)
@@ -40,4 +41,13 @@ export const getOrders = async ({
   if (maxTotal != null && maxTotal !== '')               params.maxTotal     = maxTotal
 
   return await axiosInstance.get(`${ORDER_API}/filter`, { params })
+}
+
+export const updateOrderItem = async (itemId, payload) => {
+  return await axiosInstance.put(`${ORDER_ITEM_API}/${itemId}`, payload)
+}
+ 
+
+export const deleteOrderItems = async (itemIds) => {
+  return await axiosInstance.delete('/order-items', { data: itemIds })
 }

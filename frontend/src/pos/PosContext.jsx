@@ -125,11 +125,16 @@ export function PosProvider({ children }) {
     )
   }
 
+  // Xóa hẳn 1 item — BE sẽ được gọi deleteOrderItem khi Lưu tạm
+  const removeItem = (id) => {
+    setOrderItems((prev) => prev.filter((i) => i.id !== id))
+  }
+
   const updateItemNote = (id, note) => {
-  setOrderItems((prev) =>
-    prev.map((i) => i.id === id ? { ...i, note } : i)
-  )
-}
+    setOrderItems((prev) =>
+      prev.map((i) => i.id === id ? { ...i, note } : i)
+    )
+  }
 
   const subtotal = useMemo(
     () => orderItems.reduce((sum, i) => sum + i.price * i.qty, 0),
@@ -147,7 +152,7 @@ export function PosProvider({ children }) {
     selectedTable, selectTable,
     products: productData?.data ?? [],
     orderItems, addProductToOrder, changeItemQty, subtotal,
-    currentOrderId, setCurrentOrderId, updateItemNote // ← expose ra ngoài
+    currentOrderId, setCurrentOrderId, updateItemNote, removeItem
   }
   console.log(orderItems)
 
