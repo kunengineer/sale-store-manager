@@ -16,4 +16,6 @@ public interface OrderItemService {
     List<OrderItems> buildItems(List<OrderItemCreateRequest> itemRequests, Orders order, Integer storeId);
 
     OrderItemResponse update(OrderItemUpdateRequest request, Integer orderItemId);
+
+    void delete(List<Integer> orderItem);
 }

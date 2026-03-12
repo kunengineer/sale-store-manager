@@ -25,6 +25,7 @@ import com.be.ssm.mapper.sales.OrdersMapper;
 import com.be.ssm.repository.identity.EmployeesRepository;
 import com.be.ssm.repository.product.ProductVariantsRepository;
 import com.be.ssm.repository.sales.CustomersRepository;
+import com.be.ssm.repository.sales.OrderItemsRepository;
 import com.be.ssm.repository.sales.OrdersRepository;
 import com.be.ssm.repository.store.StoreProductPriceRepository;
 import com.be.ssm.repository.store.StoreTablesRepository;
@@ -52,6 +53,7 @@ public class OrderServiceImpl implements OrderService {
     private final CustomersRepository customersRepository;
     private final EmployeesRepository employeesRepository;
     private final ProductVariantsRepository productVariantsRepository;
+    private final OrderItemsRepository orderItemsRepository;
 
     private final OrderTotalCalculator orderTotalCalculator;
 
@@ -113,7 +115,9 @@ public class OrderServiceImpl implements OrderService {
 
         List<OrderItems> itemsToAdd = orderItemService.buildItems(newItems, order, storeId);
 
-        order.getOrderItems().addAll(itemsToAdd);
+        List<OrderItems> savedItems = orderItemsRepository.saveAll(itemsToAdd);
+
+        savedItems.forEach(order::addItem);
 
         orderTotalCalculator.recalculateFromItems(order);
 

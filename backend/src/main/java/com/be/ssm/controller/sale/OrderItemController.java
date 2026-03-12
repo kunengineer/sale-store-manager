@@ -17,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/order-items")
@@ -85,5 +87,33 @@ public class OrderItemController {
                         null,
                         httpRequest.getRequestURI()
                 ));
+    }
+
+    @DeleteMapping
+    @Operation(
+            summary = "Delete order items",
+            description = "Delete multiple order items by list of ids",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Order items deleted successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data"),
+                    @ApiResponse(responseCode = "404", description = "Order item not found"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<APIResponse<Void>> deleteOrderItems(
+            @RequestBody List<Integer> orderItemIds,
+            HttpServletRequest httpRequest) {
+
+        orderItemService.delete(orderItemIds);
+
+        return ResponseEntity.ok(
+                new APIResponse<>(
+                        true,
+                        "Order items deleted successfully",
+                        null,
+                        null,
+                        httpRequest.getRequestURI()
+                )
+        );
     }
 }

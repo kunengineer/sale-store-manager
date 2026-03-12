@@ -145,8 +145,8 @@ public class Orders {
     // ===============================
 
     public void addItem(OrderItems item) {
-        item.setOrder(this);
         orderItems.add(item);
+        item.setOrder(this);
     }
 
     public void removeItem(OrderItems item) {

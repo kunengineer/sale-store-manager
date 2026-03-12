@@ -74,15 +74,18 @@ public class OrderItemServiceImpl implements OrderItemService {
         log.info("Update order item with id {}", id);
 
         OrderItems orderItem = findById(id);
-        ProductVariants productVariants = findProductVariantById(request.getProductVariantId());
-        Orders order = findOrderById(request.getOrderId());
+        Integer storeId = orderItem.getOrder().getStoreTables().getZone().getStore().getStoreId();
+
+        BigDecimal unitPrice = resolveUnitPrice(storeId, orderItem.getProductVariants());
+        BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(request.getQuantity()));
+        orderItem.setUnitPrice(unitPrice);
+        orderItem.setLineTotal(lineTotal);
 
         mapper.updateEntityFromRequest(request, orderItem);
-        orderItem.setOrder(order);
-        orderItem.setProductVariants(productVariants);
 
         repository.save(orderItem);
 
+        Orders order = findOrderById(request.getOrderId());
         orderTotalCalculator.recalculate(order);
         Orders saved = ordersRepository.save(order);
 
@@ -90,6 +93,21 @@ public class OrderItemServiceImpl implements OrderItemService {
                 .getLast();
 
         return mapper.toOrderItemResponse(savedItem);
+    }
+
+    @Override
+    public void delete(List<Integer> orderItem) {
+        List<OrderItems> items = orderItem
+                .stream()
+                .map(this::findById)
+                .toList();
+        Integer orderId = items.getFirst().getOrder().getOrderId();
+
+        repository.deleteAll(items);
+
+        Orders order = findOrderById(orderId);
+        orderTotalCalculator.recalculate(order);
+        ordersRepository.save(order);
     }
 
     private OrderItems findById(Integer id) {
