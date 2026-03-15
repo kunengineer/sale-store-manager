@@ -12,22 +12,21 @@ import java.util.List;
 
 public interface ProductsRepository extends JpaRepository<Products, Integer>, JpaSpecificationExecutor<Products> {
     @Query("""
-    SELECT 
-        p.productId as productId,
-        p.productName as productName,
-        c.categoryName as categoryName,
-        v.variantId as variantId,
-        v.variantName as variantName,
-        v.variantType as variantType,
+    SELECT
+        p.productId       as productId,
+        p.productName     as productName,
+        c.categoryName    as categoryName,
+        v.variantId       as variantId,
+        v.variantName     as variantName,
+        v.variantType     as variantType,
         COALESCE(svp.price, v.price) as finalPrice
     FROM Products p
-    JOIN p.category c
-    JOIN ProductVariants v ON v.product.productId = p.productId
+    JOIN p.category c on p.category.categoryId = c.categoryId
+    LEFT JOIN ProductVariants v ON v.product.productId = p.productId
     LEFT JOIN StoreVariantPrice svp
         ON svp.productVariant.variantId = v.variantId
-        AND svp.store.storeId = :storeId
-        AND svp.isActive = true
-    WHERE p.isActive = true
+    WHERE p.store.storeId = :storeId
+      AND p.isActive = true
       AND v.isActive = true
 """)
     List<PosProductProjection> findAllForPos(@Param("storeId") Integer storeId);

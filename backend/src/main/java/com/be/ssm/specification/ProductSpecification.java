@@ -17,7 +17,7 @@ public class ProductSpecification {
             }
             List<Predicate> predicates = new ArrayList<>();
 
-            if (filter.getStoreId() == null) {
+            if (filter.getStoreId() != null) {
                 predicates.add(cb.equal(
                         root.get("store").get("storeId"),
                         filter.getCategoryId()
