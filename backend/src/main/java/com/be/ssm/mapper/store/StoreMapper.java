@@ -1,5 +1,6 @@
 package com.be.ssm.mapper.store;
 
+import com.be.ssm.dto.request.store.RegisterNewStore;
 import com.be.ssm.dto.request.store.StoreCreateRequest;
 import com.be.ssm.dto.request.store.StoreUpdateRequest;
 import com.be.ssm.dto.response.store.StoreResponse;
@@ -11,6 +12,8 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface StoreMapper {
     StoreResponse toStoreResponse(Stores store);
+
+    Stores toStoreEntity(RegisterNewStore request);
 
     Stores toStoreEntity(StoreCreateRequest request);
 

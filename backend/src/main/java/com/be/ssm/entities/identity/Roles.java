@@ -1,5 +1,6 @@
 package com.be.ssm.entities.identity;
 
+import com.be.ssm.entities.store.Stores;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,4 +26,8 @@ public class Roles {
 
     @Column(name = "is_system", nullable = false)
     private Boolean isSystem;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id")
+    private Stores stores;
 }

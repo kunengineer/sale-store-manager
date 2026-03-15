@@ -1,17 +1,17 @@
 package com.be.ssm.dto.request.store;
 
-import lombok.Builder;
-import lombok.Data;
-
+import com.be.ssm.dto.request.identity.EmployeeCreateRequest;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
+import lombok.Builder;
+import lombok.Data;
 
 import java.time.LocalTime;
 
 @Data
 @Builder
-public class StoreCreateRequest {
+public class RegisterNewStore {
 
     @NotBlank(message = "Store code must not be blank")
     @Size(max = 20, message = "Store code must not exceed 20 characters")
@@ -40,4 +40,7 @@ public class StoreCreateRequest {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     @Schema(type = "string", example = "22:00")
     private LocalTime closeTime;
+
+    private EmployeeCreateRequest employee;
+
 }

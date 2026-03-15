@@ -15,6 +15,8 @@ public interface RoleMapper {
 
     Roles toRoleEntity(RoleCreateRequest request);
 
+    Roles toRoleEntity(RoleResponse request);
+
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(RoleUpdateRequest request,
                                  @MappingTarget Roles entity);

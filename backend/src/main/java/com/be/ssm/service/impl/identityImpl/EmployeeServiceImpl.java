@@ -1,5 +1,6 @@
 package com.be.ssm.service.impl.identityImpl;
 
+import com.be.ssm.dto.request.account.AccountCreateRequest;
 import com.be.ssm.dto.request.identity.EmployeeCreateRequest;
 import com.be.ssm.dto.request.identity.EmployeeUpdateRequest;
 import com.be.ssm.dto.response.identity.EmployeeResponse;
@@ -12,12 +13,14 @@ import com.be.ssm.exceptions.CustomException;
 import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.account.AccountMapper;
 import com.be.ssm.mapper.identity.EmployeeMapper;
+import com.be.ssm.mapper.identity.RoleMapper;
 import com.be.ssm.repository.identity.EmployeesRepository;
 import com.be.ssm.repository.identity.RolesRepository;
 import com.be.ssm.repository.identity.WorkShiftsRepository;
 import com.be.ssm.repository.store.StoresRepository;
 import com.be.ssm.service.account.AccountService;
 import com.be.ssm.service.identity.EmployeeService;
+import com.be.ssm.service.identity.RoleService;
 import com.be.ssm.service.impl.accountImpl.OurUserDetailsService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,14 +32,16 @@ import org.springframework.stereotype.Service;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeesRepository repository;
-    private final RolesRepository rolesRepository;
     private final StoresRepository storesRepository;
     private final WorkShiftsRepository workShiftsRepository;
 
     private final OurUserDetailsService userDetailsService;
+    private final RoleService roleService;
+    private final AccountService accountService;
 
     private final EmployeeMapper mapper;
     private final AccountMapper accountMapper;
+    private final RoleMapper roleMapper;
 
     @Override
     public EmployeeResponse getById(Integer id) {
@@ -56,19 +61,37 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeResponse create(EmployeeCreateRequest request) {
         log.info("Create new employee");
-        Roles role = findRoleById(request.getRoleId());
-        Stores store = storesRepository.findById(request.getStoreId())
-                .orElseThrow(()-> new CustomException(Error.STORE_NOT_FOUND));
-        WorkShifts workShifts = findWorkShiftById(request.getWorkShiftId());
-        Accounts account = accountMapper.toAccountEntity(request.getAccountCreateRequest());
 
-        Employees employee = mapper.toEmployeeEntity(request);
+        Roles role = findRoleById(request.getRoleId());
+
+        return mapper.toEmployeeResponse(setUpAccount(request,
+                request.getAccountCreateRequest(),
+                request.getStoreId(), request.getWorkShiftId(),
+                role));
+    }
+
+    @Override
+    public Employees createOwnerForStore(EmployeeCreateRequest request) {
+
+        Roles role = roleService.initRoleForOwn(request.getStoreId());
+
+        return setUpAccount(request, request.getAccountCreateRequest(), request.getStoreId(), request.getWorkShiftId(), role);
+    }
+
+    private Employees setUpAccount(EmployeeCreateRequest employeeC, AccountCreateRequest request, Integer storeId, Integer workShiftId, Roles role) {
+        Accounts account = accountService.createAccountForEmployee(request);
+        Stores store = findStoreById(storeId);
+
+        WorkShifts workShifts = workShiftId !=null ?  findWorkShiftById(workShiftId) : null;
+
+        Employees employee = mapper.toEmployeeEntity(employeeC);
         employee.setRole(role);
         employee.setStore(store);
         employee.setWorkShift(workShifts);
+
         employee.setAccount(account);
 
-        return mapper.toEmployeeResponse(repository.save(employee));
+        return repository.save(employee);
     }
 
     @Override
@@ -86,6 +109,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         return mapper.toEmployeeResponse(repository.save(employee));
     }
 
+    @Override
+    public Employees getEmployeeForAccount(Integer accountId) {
+         return repository.findEmployeesByAccount_AccountId(accountId)
+                .orElseThrow();
+    }
+
     private Employees findById(Integer id) {
         log.info("Finding employee by id {}", id);
 
@@ -96,8 +125,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private Roles findRoleById(Integer id) {
         log.info("Finding role by id {}", id);
 
-        return rolesRepository.findById(id)
-                .orElseThrow(()-> new CustomException(Error.ROLE_NOT_FOUND));
+        return roleMapper.toRoleEntity(roleService.getById(id));
     }
 
     private WorkShifts findWorkShiftById(Integer id) {
@@ -105,5 +133,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         return workShiftsRepository.findById(id)
                 .orElseThrow(()-> new CustomException(Error.WORK_SHIFT_NOT_FOUND));
+    }
+
+    private Stores findStoreById(Integer id) {
+        log.info("Finding store by id {}", id);
+
+        return storesRepository.findById(id)
+                .orElseThrow(()-> new CustomException(Error.STORE_NOT_FOUND));
     }
 }

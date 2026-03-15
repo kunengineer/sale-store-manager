@@ -24,7 +24,7 @@ public class Employees {
     private Integer employeeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "work_shift_id", nullable = false)
+    @JoinColumn(name = "work_shift_id")
     private WorkShifts workShift;
 
     @ManyToOne
@@ -43,9 +43,6 @@ public class Employees {
 
     @Column(name = "phone", length = 20)
     private String phone;
-
-    @Column(name = "email", length = 100)
-    private String email;
 
     @Column(name = "dob")
     private LocalDateTime dob;

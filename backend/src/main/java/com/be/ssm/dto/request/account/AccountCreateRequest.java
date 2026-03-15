@@ -24,11 +24,11 @@ public class AccountCreateRequest {
     @Schema(example = "password123")
     private String password;
 
+    @Schema(
+            description = "Account email",
+            example = "admin@gmail.com"
+    )
     private String email;
-
-    @Size(max = 150)
-    @Schema(example = "Nguyen Van Updated")
-    private String fullName;
 
     @Schema(example = "ADMIN")
     private AccountRole role;

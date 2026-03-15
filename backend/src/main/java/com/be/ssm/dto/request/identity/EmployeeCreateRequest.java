@@ -63,7 +63,6 @@ public class EmployeeCreateRequest {
     private Integer roleId;
 
     @NotNull
-    @Schema(example = "1")
     private Integer workShiftId;
 
     @NotNull

@@ -30,9 +30,6 @@ public class Accounts implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "full_name", nullable = false, length = 150)
-    private String fullName;
-
     @Column(name = "email", nullable = false)
     private String email;
 

@@ -2,6 +2,7 @@ package com.be.ssm.entities.store;
 
 
 import com.be.ssm.entities.account.Accounts;
+import com.be.ssm.entities.identity.Employees;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,7 +41,7 @@ public class Stores {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id")
-    private Accounts manager;
+    private Employees manager;
 
     @Column(name = "open_time")
     private LocalTime openTime;

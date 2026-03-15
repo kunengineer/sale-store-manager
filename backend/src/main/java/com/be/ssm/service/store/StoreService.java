@@ -1,5 +1,6 @@
 package com.be.ssm.service.store;
 
+import com.be.ssm.dto.request.store.RegisterNewStore;
 import com.be.ssm.dto.request.store.StoreCreateRequest;
 import com.be.ssm.dto.request.store.StoreUpdateRequest;
 import com.be.ssm.dto.response.store.StoreResponse;
@@ -14,6 +15,8 @@ public interface StoreService {
     List<StoreResponse> getByManager();
 
     StoreResponse create(StoreCreateRequest request);
+
+    StoreResponse registerNewStore(RegisterNewStore request);
 
     StoreResponse update(StoreUpdateRequest request, Integer storeId);
 

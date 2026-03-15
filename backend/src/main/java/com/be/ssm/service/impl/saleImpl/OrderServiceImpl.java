@@ -30,6 +30,7 @@ import com.be.ssm.repository.sales.OrdersRepository;
 import com.be.ssm.repository.store.StoreProductPriceRepository;
 import com.be.ssm.repository.store.StoreTablesRepository;
 import com.be.ssm.repository.store.StoreVariantPriceRepository;
+import com.be.ssm.service.identity.EmployeeService;
 import com.be.ssm.service.impl.accountImpl.OurUserDetailsService;
 import com.be.ssm.service.sale.OrderItemService;
 import com.be.ssm.service.sale.OrderService;
@@ -51,7 +52,6 @@ public class OrderServiceImpl implements OrderService {
     private final OrdersRepository repository;
     private final StoreTablesRepository storeTablesRepository;
     private final CustomersRepository customersRepository;
-    private final EmployeesRepository employeesRepository;
     private final ProductVariantsRepository productVariantsRepository;
     private final OrderItemsRepository orderItemsRepository;
 
@@ -60,6 +60,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrdersMapper mapper;
     private final OrderItemService orderItemService;
     private final OurUserDetailsService userDetailsService;
+    private final EmployeeService employeeService;
 
 
     @Override
@@ -82,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
         StoreTables table = findStoreTableById(request.getTableId());
         Accounts accounts = userDetailsService.getAccountAuth();
         log.info("Create new account {}", accounts);
-        Employees employee = findEmployeeByAccount(userDetailsService.getAccountAuth());
+        Employees employee = employeeService.getEmployeeForAccount(userDetailsService.getAccountAuth().getAccountId());
         log.info("employee table {}", employee);
         Customers customer = request.getCustomerId() != null ? findCustomerById(request.getCustomerId()) : null;
 
@@ -175,12 +176,6 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(()-> new CustomException(Error.CUSTOMER_NOT_FOUND));
     }
 
-    private  Employees findEmployeeByAccount(Accounts a) {
-        log.info("Finding employee by account");
-
-        return employeesRepository.findEmployeesByAccount_AccountId(a.getAccountId())
-                .orElseThrow();
-    }
 
 
 }

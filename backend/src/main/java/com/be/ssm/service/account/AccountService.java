@@ -5,6 +5,7 @@ import com.be.ssm.dto.request.account.AccountUpdateRequest;
 import com.be.ssm.dto.request.account.FormLogin;
 import com.be.ssm.dto.response.account.AccountResponse;
 import com.be.ssm.dto.response.account.AuthenticationResponse;
+import com.be.ssm.entities.account.Accounts;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,6 +13,8 @@ public interface AccountService {
     AccountResponse getById(Integer id);
 
     AccountResponse create(AccountCreateRequest request);
+
+    Accounts createAccountForEmployee(AccountCreateRequest request);
 
     AccountResponse update(AccountUpdateRequest request, Integer accountId);
 

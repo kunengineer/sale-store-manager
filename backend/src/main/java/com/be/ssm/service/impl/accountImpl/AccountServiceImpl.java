@@ -39,12 +39,22 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public AccountResponse create(AccountCreateRequest request) {
         log.info("Create new account: {}", request);
+
+        return mapper.toAccountResponse(setUpAccount(request));
+    }
+
+    @Override
+    public Accounts createAccountForEmployee(AccountCreateRequest request) {
+        return setUpAccount(request);
+    }
+
+    private Accounts setUpAccount(AccountCreateRequest request){
         existsUserNameOrEmail(request.getUsername(), request.getEmail());
 
         Accounts account = mapper.toAccountEntity(request);
         account.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        return mapper.toAccountResponse(repository.save(account));
+        return repository.save(account);
     }
 
     @Override

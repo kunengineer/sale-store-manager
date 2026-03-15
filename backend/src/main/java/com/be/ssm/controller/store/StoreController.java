@@ -1,6 +1,7 @@
 package com.be.ssm.controller.store;
 
 import com.be.ssm.dto.common.APIResponse;
+import com.be.ssm.dto.request.store.RegisterNewStore;
 import com.be.ssm.dto.request.store.StoreCreateRequest;
 import com.be.ssm.dto.request.store.StoreUpdateRequest;
 import com.be.ssm.dto.response.store.StoreResponse;
@@ -26,6 +27,33 @@ import java.util.List;
 public class StoreController {
     private final StoreService storeService;
 
+    @PostMapping("/register")
+    @Operation(
+            summary = "Create new store",
+            description = "Create a new store with basic information",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Store created successfully",
+                            content = @Content(schema = @Schema(implementation = StoreResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
+    public ResponseEntity<APIResponse<StoreResponse>> registerNewStore(
+            @RequestBody @Valid RegisterNewStore request,
+            HttpServletRequest httpRequest) {
+
+        StoreResponse response = storeService.registerNewStore(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new APIResponse<>(
+                        true,
+                        "Store created successfully",
+                        response,
+                        null,
+                        httpRequest.getRequestURI()
+                ));
+    }
+
     @PostMapping
     @Operation(
             summary = "Create new store",
@@ -37,7 +65,7 @@ public class StoreController {
                     @ApiResponse(responseCode = "500", description = "Internal server error")
             }
     )
-    public ResponseEntity<APIResponse<StoreResponse>> createStore(
+    public ResponseEntity<APIResponse<StoreResponse>> create(
             @RequestBody @Valid StoreCreateRequest request,
             HttpServletRequest httpRequest) {
 
@@ -52,6 +80,8 @@ public class StoreController {
                         httpRequest.getRequestURI()
                 ));
     }
+
+
 
     @GetMapping("/{id}")
     @Operation(
