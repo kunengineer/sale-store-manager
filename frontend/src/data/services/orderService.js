@@ -43,10 +43,10 @@ export const getOrders = async ({
   return await axiosInstance.get(`${ORDER_API}/filter`, { params })
 }
 
-export const updateOrderItem = async (itemId, payload) => {
-  return await axiosInstance.put(`${ORDER_ITEM_API}/${itemId}`, payload)
-}
- 
+  export const updateOrderItem = async (itemId, payload) => {
+    return await axiosInstance.put(`${ORDER_ITEM_API}/${itemId}`, payload)
+  }
+  
 
 export const deleteOrderItems = async (itemIds) => {
   return await axiosInstance.delete('/order-items', { data: itemIds })

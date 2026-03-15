@@ -124,6 +124,7 @@ function Step1({ onSuccess }) {
 
     } catch (err) {
       // err = { status, message, errors } — do interceptor format
+      console.error('Error creating account:', err)
       const fieldErrors = {}
       ;(err.errors ?? []).forEach(({ code }) => {
         const mapped = ERROR_CODES[code]

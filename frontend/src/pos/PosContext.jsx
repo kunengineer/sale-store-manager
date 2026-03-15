@@ -103,6 +103,7 @@ export function PosProvider({ children }) {
           }))
         )
       }
+      
     } catch (err) {
       if (err?.status !== 404) console.error('Lỗi load order:', err)
       // 404 = bàn trống → bình thường
@@ -113,7 +114,7 @@ export function PosProvider({ children }) {
   const addProductToOrder = (item) => {
     setOrderItems((prev) => [
       ...prev,
-      { id: Date.now(), ...item, qty: 1 },
+      { id: crypto.randomUUID(), ...item, qty: 1 },
       // id = Date.now(), KHÔNG có orderItemId → FE biết đây là item mới
     ])
   }
