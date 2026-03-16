@@ -8,7 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Data
 @Builder
@@ -35,12 +37,6 @@ public class Invoices {
     @Column(name = "buyer_name", length = 150)
     private String buyerName;
 
-    @Column(name = "subtotal", nullable = false, precision = 15, scale = 2)
-    private BigDecimal subtotal;
-
-    @Column(name = "tax_amount", nullable = false, precision = 15, scale = 2)
-    private BigDecimal taxAmount;
-
     @Column(name = "total_amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal totalAmount;
 
@@ -52,6 +48,18 @@ public class Invoices {
 
     @PrePersist
     public void prePersist() {
+        if(this.invoiceNumber == null) this.invoiceNumber = buildInvoiceNumber();
         this.issuedAt = LocalDateTime.now();
+    }
+
+    private String buildInvoiceNumber() {
+        String date = LocalDate.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        String random = String.valueOf(
+                (int) (Math.random() * 900000) + 100000
+        );
+
+        return "INV-" + date + "-" + random;
     }
 }
