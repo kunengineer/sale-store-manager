@@ -7,6 +7,7 @@ import com.be.ssm.dto.response.store.StoreResponse;
 import com.be.ssm.entities.account.Accounts;
 import com.be.ssm.entities.identity.Employees;
 import com.be.ssm.entities.store.Stores;
+import com.be.ssm.enums.account.AccountRole;
 import com.be.ssm.exceptions.CustomException;
 import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.store.StoreMapper;
@@ -15,6 +16,7 @@ import com.be.ssm.repository.store.StoresRepository;
 import com.be.ssm.service.identity.EmployeeService;
 import com.be.ssm.service.impl.accountImpl.OurUserDetailsService;
 import com.be.ssm.service.store.StoreService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,7 +44,7 @@ public class StoreServiceImpl implements StoreService {
     public List<StoreResponse> getByManager() {
 
         Accounts manager = userDetailsService.getAccountAuth();
-        List<Stores> store = repository.findAllByManager(manager);
+        List<Stores> store = repository.findAllByManager_Account_AccountId(manager.getAccountId());
 
         return mapper.toStoreResponseList(store);
     }
@@ -57,13 +59,15 @@ public class StoreServiceImpl implements StoreService {
         return mapper.toStoreResponse(repository.save(stores));
     }
 
+    @Transactional
     @Override
     public StoreResponse registerNewStore(RegisterNewStore request) {
         log.info("Create new store");
         Stores stores = repository.save(mapper.toStoreEntity(request));
 
-        request.getEmployee().setStoreId(stores.getStoreId());
-        Employees employees = employeeService.createOwnerForStore(request.getEmployee());
+        request.getEmployee().setEmpCode("OWNER_STORE");
+        request.getEmployee().getAccountCreateRequest().setRole(AccountRole.MANAGER);
+        Employees employees = employeeService.createOwnerForStore(request.getEmployee(), stores);
 
         stores.setManager(employees);
 

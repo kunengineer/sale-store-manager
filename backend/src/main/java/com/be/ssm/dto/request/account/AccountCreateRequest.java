@@ -15,21 +15,8 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class AccountCreateRequest {
-
-    @Size(max = 50)
-    @Schema(example = "admin01")
     private String username;
-
-    @Size(min = 6, max = 100)
-    @Schema(example = "password123")
     private String password;
-
-    @Schema(
-            description = "Account email",
-            example = "admin@gmail.com"
-    )
     private String email;
-
-    @Schema(example = "ADMIN")
     private AccountRole role;
 }

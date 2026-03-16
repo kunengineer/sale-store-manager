@@ -47,14 +47,14 @@ public class Employees {
     @Column(name = "dob")
     private LocalDateTime dob;
 
-    @Column(name = "hire_date", nullable = false)
+    @Column(name = "hire_date")
     private LocalDateTime hireDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "salary_type", nullable = false, length = 20)
+    @Column(name = "salary_type", length = 20)
     private SalaryType salaryType;
 
-    @Column(name = "base_salary", nullable = false, precision = 15, scale = 2)
+    @Column(name = "base_salary", precision = 15, scale = 2)
     private BigDecimal baseSalary;
 
     @Column(name = "id_number", length = 20)
@@ -75,6 +75,7 @@ public class Employees {
 
     @PrePersist
     public void prePersist() {
+        this.isActive = true;
         this.createdAt = LocalDateTime.now();
     }
 }

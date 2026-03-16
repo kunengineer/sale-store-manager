@@ -54,13 +54,13 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Roles initRoleForOwn(Integer storeId) {
-        Stores stores = findStoreById(storeId);
+    public Roles initRoleForOwn(Integer storeId, Stores store) {
 
         Roles roles = Roles.builder()
                 .roleName("STORE OWNER")
                 .description("Manager for store")
                 .isSystem(false)
+                .stores(store)
                 .build();
 
         return repository.save(roles);

@@ -24,6 +24,7 @@ import com.be.ssm.service.identity.RoleService;
 import com.be.ssm.service.impl.accountImpl.OurUserDetailsService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.Store;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -64,23 +65,22 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Roles role = findRoleById(request.getRoleId());
 
-        return mapper.toEmployeeResponse(setUpAccount(request,
+        return mapper.toEmployeeResponse(saveAccount(request,
                 request.getAccountCreateRequest(),
-                request.getStoreId(), request.getWorkShiftId(),
+                findStoreById(request.getStoreId()), request.getWorkShiftId(),
                 role));
     }
 
     @Override
-    public Employees createOwnerForStore(EmployeeCreateRequest request) {
+    public Employees createOwnerForStore(EmployeeCreateRequest request, Stores store) {
 
-        Roles role = roleService.initRoleForOwn(request.getStoreId());
+        Roles role = roleService.initRoleForOwn(request.getStoreId(), store);
 
-        return setUpAccount(request, request.getAccountCreateRequest(), request.getStoreId(), request.getWorkShiftId(), role);
+        return saveAccount(request, request.getAccountCreateRequest(), store, request.getWorkShiftId(), role);
     }
 
-    private Employees setUpAccount(EmployeeCreateRequest employeeC, AccountCreateRequest request, Integer storeId, Integer workShiftId, Roles role) {
+    private Employees saveAccount(EmployeeCreateRequest employeeC, AccountCreateRequest request, Stores store, Integer workShiftId, Roles role) {
         Accounts account = accountService.createAccountForEmployee(request);
-        Stores store = findStoreById(storeId);
 
         WorkShifts workShifts = workShiftId !=null ?  findWorkShiftById(workShiftId) : null;
 
