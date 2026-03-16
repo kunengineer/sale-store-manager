@@ -152,7 +152,7 @@ public class StoreTableController {
     // =========================
 // MOVE TABLE
 // =========================
-    @PutMapping("/{id}/move")
+    @PutMapping("/move")
     @Operation(
             summary = "Move table to another zone",
             description = "Change table's zone (chuyển bàn sang khu vực khác)",
@@ -164,11 +164,10 @@ public class StoreTableController {
             }
     )
     public ResponseEntity<APIResponse<StoreTableResponse>> moveTable(
-            @PathVariable Integer id,
             @RequestBody @Valid MoveTableRequest request,
             HttpServletRequest httpRequest) {
 
-        StoreTableResponse response = storeTableService.moveTable(id, request);
+        StoreTableResponse response = storeTableService.moveTable(request);
 
         return ResponseEntity.ok(
                 new APIResponse<>(

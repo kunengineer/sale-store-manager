@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface StoreTablesRepository extends JpaRepository<StoreTables, Integer>, JpaSpecificationExecutor<StoreTables> {
 
@@ -37,7 +38,7 @@ SELECT EXISTS(
                                      @Param("zoneId") Integer zoneId,
                                      @Param("tableCode") String tableCode);
 
-    List<StoreTables> findByZoneZoneId(Integer zoneId);
+    Optional<StoreTables> findStoreTablesByTableIdAndStatusEquals(Integer tableId, TableStatus status);
 
     List<StoreTables> findByZoneStoreStoreId(Integer storeId);
 

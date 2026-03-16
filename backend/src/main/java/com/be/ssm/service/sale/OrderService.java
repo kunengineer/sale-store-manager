@@ -6,6 +6,7 @@ import com.be.ssm.dto.request.sale.OrderCreateRequest;
 import com.be.ssm.dto.request.sale.OrderItemCreateRequest;
 import com.be.ssm.dto.request.sale.OrderUpdateRequest;
 import com.be.ssm.dto.response.sale.OrderResponse;
+import com.be.ssm.entities.store.StoreTables;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,9 @@ public interface OrderService {
     OrderResponse create(OrderCreateRequest request);
 
     OrderResponse addItems(Integer orderId, List<OrderItemCreateRequest> newItems);
+
+    void moveOrder(Integer originTable, StoreTables storeTable);
+    void mergeOrder(Integer originTable, Integer targetTable);
 
     OrderResponse update(OrderUpdateRequest request, Integer orderId);
 

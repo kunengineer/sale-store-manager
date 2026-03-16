@@ -87,6 +87,8 @@ public enum Error {
 
         // Store table errors
         STORE_TABLE_NOT_FOUND(110006, "Store table not found", HttpStatus.NOT_FOUND),
+        STORE_TABLE_UNAVAILABLE(110007, "Store table unavailable", HttpStatus.NOT_FOUND),
+        TABLE_AVAILABLE(11008, "Don't merge table is available. Please change operator", HttpStatus.BAD_REQUEST),
 
         // Store zone errors
         STORE_ZONE_NOT_FOUND(110007, "Store zone not found", HttpStatus.NOT_FOUND),

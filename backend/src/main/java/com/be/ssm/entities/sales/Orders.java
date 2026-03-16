@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Builder
@@ -86,45 +87,29 @@ public class Orders {
     @PrePersist
     @PreUpdate
     private void prePersist() {
+        if (status == null) status = OrderStatus.IN_PROGRESS;
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (orderNumber == null) orderNumber = buildOrderNumber();
 
-        if (status == null) {
-            status = OrderStatus.IN_PROGRESS;
-        }
-
-        if (vat == null) {
-            vat = BigDecimal.ZERO;
-        }
-
+        ensureDefaults();
         calculateTotals();
-
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-
-        if (orderNumber == null) {
-            orderNumber = buildOrderNumber();
-        }
     }
 
     private void calculateTotals() {
-
         subtotal = orderItems.stream()
                 .map(OrderItems::getLineTotal)
-                .filter(v -> v != null)
+                .filter(Objects::nonNull)
                 .reduce(ZERO, BigDecimal::add)
                 .setScale(2, RoundingMode.HALF_UP);
 
-        if (discountAmount == null) {
-            discountAmount = ZERO;
-        }
-
-        BigDecimal afterDiscount = subtotal.subtract(discountAmount);
-
-        taxAmount = afterDiscount
+        // Tax tính trên subtotal (trước discount)
+        taxAmount = subtotal
                 .multiply(vat)
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
 
-        grandTotal = afterDiscount
+        // grandTotal = subtotal - discount + tax
+        grandTotal = subtotal
+                .subtract(discountAmount)
                 .add(taxAmount)
                 .setScale(2, RoundingMode.HALF_UP);
     }
@@ -140,13 +125,27 @@ public class Orders {
         return "ORD-" + date + "-" + random;
     }
 
-    // ===============================
-    // Helper for bi-directional mapping
-    // ===============================
-
     public void addItem(OrderItems item) {
         orderItems.add(item);
         item.setOrder(this);
+    }
+
+    public void recalculate(){
+        ensureDefaults();
+        calculateTotals();
+    }
+
+    private void ensureDefaults() {
+        if (vat == null)            vat            = ZERO;
+        if (discountAmount == null) discountAmount = ZERO;
+        if (taxAmount == null)      taxAmount      = ZERO;
+    }
+
+    @Transient
+    public void addItems(List<OrderItems> items) {
+        for (OrderItems item : items) {
+            addItem(item);
+        }
     }
 
     public void removeItem(OrderItems item) {

@@ -4,5 +4,6 @@ import lombok.Data;
 
 @Data
 public class MoveTableRequest {
-    private Integer targetZoneId;
+    private Integer fromTableId;
+    private Integer toTableId;
 }

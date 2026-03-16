@@ -8,6 +8,7 @@ import com.be.ssm.dto.request.store.StoreTableCreateRequest;
 import com.be.ssm.dto.request.store.StoreTableUpdateRequest;
 import com.be.ssm.dto.response.store.StoreTableResponse;
 import com.be.ssm.dto.response.store.StoreZoneLayoutResponse;
+import com.be.ssm.entities.store.StoreTables;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +23,9 @@ public interface StoreTableService {
 
     PageDTO<StoreTableResponse> filter(int page, int size, StoreTableFilter filter);
 
-    StoreTableResponse moveTable(Integer tableId, MoveTableRequest request);
+    StoreTables getTableAvailable(Integer tableId);
+
+    StoreTableResponse moveTable(MoveTableRequest request);
 
     void mergeTables(MergeTablesRequest request);
 

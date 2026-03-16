@@ -8,7 +8,6 @@ import com.be.ssm.entities.sales.OrderItems;
 import com.be.ssm.entities.sales.Orders;
 import com.be.ssm.exceptions.CustomException;
 import com.be.ssm.exceptions.Error;
-import com.be.ssm.helper.OrderTotalCalculator;
 import com.be.ssm.entities.store.StoreProductPrice;
 import com.be.ssm.entities.store.StoreVariantPrice;
 import com.be.ssm.mapper.sales.OrderItemMapper;
@@ -33,7 +32,6 @@ public class OrderItemServiceImpl implements OrderItemService {
     private final OrdersRepository ordersRepository;
     private final ProductVariantsRepository productVariantsRepository;
 
-    private final OrderTotalCalculator orderTotalCalculator;
 
     private final OrderItemMapper mapper;
     // Order service
@@ -86,7 +84,7 @@ public class OrderItemServiceImpl implements OrderItemService {
         repository.save(orderItem);
 
         Orders order = findOrderById(request.getOrderId());
-        orderTotalCalculator.recalculate(order);
+        order.recalculate();
         Orders saved = ordersRepository.save(order);
 
         OrderItems savedItem = saved.getOrderItems()
@@ -106,7 +104,7 @@ public class OrderItemServiceImpl implements OrderItemService {
         repository.deleteAll(items);
 
         Orders order = findOrderById(orderId);
-        orderTotalCalculator.recalculate(order);
+        order.recalculate();
         ordersRepository.save(order);
     }
 

@@ -17,6 +17,7 @@ import com.be.ssm.mapper.store.StoreTableMapper;
 import com.be.ssm.mapper.store.StoreZoneMapper;
 import com.be.ssm.repository.store.StoreTablesRepository;
 import com.be.ssm.repository.store.StoreZonesRepository;
+import com.be.ssm.service.sale.OrderService;
 import com.be.ssm.service.store.StoreTableService;
 import com.be.ssm.specification.StoreTableSpecification;
 import com.sun.jdi.request.DuplicateRequestException;
@@ -36,6 +37,8 @@ public class StoreTableServiceImpl implements StoreTableService {
     private final StoreTablesRepository repository;
     private final StoreZonesRepository storeZonesRepository;
     private final StoreTableMapper mapper;
+
+    private final OrderService orderService;
 
 
     @Override
@@ -88,17 +91,27 @@ public class StoreTableServiceImpl implements StoreTableService {
     }
 
     @Override
-    public StoreTableResponse moveTable(Integer tableId, MoveTableRequest request) {
-        log.info("Moving table with id {} to zone {}", tableId, request.getTargetZoneId());
+    public StoreTables getTableAvailable(Integer tableId) {
+        return repository.findStoreTablesByTableIdAndStatusEquals(tableId, TableStatus.AVAILABLE)
+                .orElseThrow(()-> new CustomException(Error.STORE_TABLE_UNAVAILABLE));
+    }
 
-        StoreTables table = findById(tableId);
+    @Override
+    public StoreTableResponse moveTable(MoveTableRequest request) {
 
-        StoreZones targetZone = storeZonesRepository.findById(request.getTargetZoneId())
-                .orElseThrow();
-        isDuplicateTableCode(targetZone.getZoneId(), table.getTableCode());
-        table.setZone(targetZone);
+        StoreTables fromTable = findById(request.getFromTableId());
+        StoreTables toTable = findById(request.getToTableId());
+        if (toTable.getStatus() != TableStatus.AVAILABLE) {
+            throw new CustomException(Error.STORE_TABLE_UNAVAILABLE);
+        }
 
-        return mapper.toStoreTableResponse(repository.save(table));
+        orderService.moveOrder(fromTable.getTableId(), toTable);
+        fromTable.setStatus(TableStatus.AVAILABLE);
+        toTable.setStatus(TableStatus.OCCUPIED);
+
+        repository.save(fromTable);
+
+        return mapper.toStoreTableResponse(repository.save(toTable));
     }
 
     @Override
@@ -106,8 +119,14 @@ public class StoreTableServiceImpl implements StoreTableService {
         StoreTables source = findById(request.getSourceTableId());
         StoreTables target = findById(request.getTargetTableId());
 
+        if (target.getStatus() != TableStatus.OCCUPIED
+                ||  source.getStatus() != TableStatus.OCCUPIED) {
+            throw new CustomException(Error.TABLE_AVAILABLE);
+        }
+
         source.setStatus(TableStatus.MERGED);
         source.setMergedIntoTableId(target.getTableId());
+        orderService.mergeOrder(source.getTableId(), target.getTableId());
 
         repository.save(source);
     }
