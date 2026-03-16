@@ -1,56 +1,33 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-// ── import toast & services của bạn ──────────────────────────
 import { useToast } from '../layout/Toast.jsx'
-import { createAccount } from '../data/services/accountService.js'
-import { createStore } from '../data/services/storeService.js'
+import { registerNewStore } from '../data/services/storeService.js'
 
-// ─────────────────────────────────────────────────────────────
-
-const ERROR_CODES = {
-  1003: { field: 'username', message: 'Tên đăng nhập đã tồn tại' },
-  1004: { field: 'email',    message: 'Email đã được sử dụng' },
+// ─── Error codes từ BE ───────────────────────────────────────────────────────
+const SERVER_ERROR_CODES = {
+  1003: { field: 'username',  message: 'Tên đăng nhập đã tồn tại' },
+  1004: { field: 'accEmail',  message: 'Email tài khoản đã được sử dụng' },
 }
 
-const ROLES = [
-  { value: 'ADMIN',    label: 'Chủ cửa hàng' },
-  { value: 'MANAGER',  label: 'Quản lý' },
-]
-
-const STORE_TYPES = ['Cafe', 'Nhà hàng', 'Bán lẻ', 'Tiệm tạp hoá', 'Khác']
-
-function InputField({ label, error, ...props }) {
+// ─── Shared UI components ────────────────────────────────────────────────────
+function InputField({ label, hint, error, ...props }) {
   return (
     <div>
       <label className="mb-1 block text-[11px] text-slate-300">{label}</label>
       <input
-        className={`w-full rounded-lg border bg-slate-950 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 transition-all duration-200
+        className={`w-full rounded-lg border bg-slate-950 px-3 py-2 text-xs text-slate-100
+          placeholder:text-slate-500 focus:outline-none focus:ring-1 transition-all duration-200
           ${error ? 'border-rose-500 focus:ring-rose-500' : 'border-slate-700 focus:ring-emerald-500'}`}
         {...props}
       />
+      {hint && !error && <p className="mt-1 text-[10px] text-slate-500">{hint}</p>}
       {error && <p className="mt-1 text-[10px] text-rose-400">{error}</p>}
     </div>
   )
 }
 
-function SelectField({ label, error, children, ...props }) {
-  return (
-    <div>
-      <label className="mb-1 block text-[11px] text-slate-300">{label}</label>
-      <select
-        className={`w-full rounded-lg border bg-slate-950 px-3 py-2 text-xs text-slate-100 focus:outline-none focus:ring-1 transition-all duration-200
-          ${error ? 'border-rose-500 focus:ring-rose-500' : 'border-slate-700 focus:ring-emerald-500'}`}
-        {...props}
-      >
-        {children}
-      </select>
-      {error && <p className="mt-1 text-[10px] text-rose-400">{error}</p>}
-    </div>
-  )
-}
-
-// ── STEP INDICATOR ────────────────────────────────────────────
+// ─── Step Indicator ──────────────────────────────────────────────────────────
 function StepIndicator({ step }) {
   return (
     <div className="mb-5 flex items-center gap-2">
@@ -62,7 +39,7 @@ function StepIndicator({ step }) {
           </div>
           <span className={`text-[11px] transition-colors duration-300
             ${step >= s ? 'text-slate-200' : 'text-slate-500'}`}>
-            {s === 1 ? 'Tài khoản' : 'Cửa hàng'}
+            {s === 1 ? 'Tài khoản & chủ sở hữu' : 'Cửa hàng'}
           </span>
           {s < 2 && (
             <div className="mx-1 h-px w-8 bg-slate-700 relative overflow-hidden rounded">
@@ -75,13 +52,9 @@ function StepIndicator({ step }) {
   )
 }
 
-// ── STEP 1: TÀI KHOẢN ─────────────────────────────────────────
-function Step1({ onSuccess }) {
-  const toast = useToast()
-  const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState({
-    fullName: '', username: '', email: '', password: '', confirmPassword: '', role: 'ADMIN',
-  })
+// ─── STEP 1 — Tài khoản + Thông tin chủ sở hữu ──────────────────────────────
+function Step1({ initialData, onSuccess }) {
+  const [form, setForm] = useState(initialData)
   const [errors, setErrors] = useState({})
 
   const set = (field) => (e) => {
@@ -91,87 +64,119 @@ function Step1({ onSuccess }) {
 
   const validate = () => {
     const e = {}
-    if (!form.fullName.trim())        e.fullName = 'Vui lòng nhập họ tên'
-    if (!form.username.trim())        e.username = 'Vui lòng nhập tên đăng nhập'
-    if (form.username.length > 50)    e.username = 'Tối đa 50 ký tự'
-    if (!form.email.trim())           e.email = 'Vui lòng nhập email'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Email không hợp lệ'
-    if (form.password.length < 6)     e.password = 'Mật khẩu tối thiểu 6 ký tự'
-    if (form.password !== form.confirmPassword) e.confirmPassword = 'Mật khẩu không khớp'
+
+    // ── Thông tin chủ sở hữu ──
+    if (!form.fullName.trim())
+      e.fullName = 'Vui lòng nhập họ tên'
+    if (!form.phone.trim())
+      e.phone = 'Vui lòng nhập số điện thoại'
+    else if (!/^(0|\+84)[0-9]{9,10}$/.test(form.phone))
+      e.phone = 'Số điện thoại không hợp lệ'
+    if (!form.empEmail.trim())
+      e.empEmail = 'Vui lòng nhập email'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.empEmail))
+      e.empEmail = 'Email không hợp lệ'
+    if (!form.dob)
+      e.dob = 'Vui lòng nhập ngày sinh'
+
+    // ── Thông tin tài khoản ──
+    if (!form.username.trim())
+      e.username = 'Vui lòng nhập tên đăng nhập'
+    else if (form.username.length > 50)
+      e.username = 'Tối đa 50 ký tự'
+    if (!form.accEmail.trim())
+      e.accEmail = 'Vui lòng nhập email tài khoản'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.accEmail))
+      e.accEmail = 'Email không hợp lệ'
+    if (form.password.length < 6)
+      e.password = 'Mật khẩu tối thiểu 6 ký tự'
+    if (form.password !== form.confirmPassword)
+      e.confirmPassword = 'Mật khẩu không khớp'
+
     return e
   }
 
-  const handleSubmit = async () => {
+  const handleNext = () => {
     const e = validate()
     if (Object.keys(e).length) { setErrors(e); return }
-
-    setLoading(true)
-    try {
-      const res = await createAccount({
-          fullName: form.fullName,
-          username: form.username,
-          email:    form.email,
-          password: form.password,
-          role:     form.role,
-        })
-
-        console.log('Account created:', res)  // interceptor unwrap APIResponse → res = AccountResponse trực tiếp
-      // interceptor unwrap APIResponse → res = AccountResponse trực tiếp
-      // res = { accountId, fullName, userName, email, createdAt, role }
-      toast.success('Tạo tài khoản thành công!', `Chào ${res.data.fullName} `)
-      onSuccess(res.data.accountId)
-      localStorage.setItem('accountId', res.data.accountId)  // ← tạm lưu accountId để dùng bước 2, sau này có thể xoá
-
-    } catch (err) {
-      // err = { status, message, errors } — do interceptor format
-      console.error('Error creating account:', err)
-      const fieldErrors = {}
-      ;(err.errors ?? []).forEach(({ code }) => {
-        const mapped = ERROR_CODES[code]
-        if (mapped) fieldErrors[mapped.field] = mapped.message
-      })
-      if (Object.keys(fieldErrors).length) setErrors(fieldErrors)
-      else toast.error('Có lỗi xảy ra!', err.message)
-    } finally {
-      setLoading(false)
-    }
+    onSuccess(form)
   }
 
   return (
-    <div className="space-y-3 animate-fadeIn">
-      <InputField label="Họ và tên *" placeholder="Nguyễn Văn A"
-        value={form.fullName} onChange={set('fullName')} error={errors.fullName} />
-      <InputField label="Tên đăng nhập *" placeholder="admin01"
-        value={form.username} onChange={set('username')} error={errors.username} />
-      <InputField label="Email *" type="email" placeholder="banhang@store.vn"
-        value={form.email} onChange={set('email')} error={errors.email} />
-      <SelectField label="Vai trò" value={form.role} onChange={set('role')} error={errors.role}>
-        {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
-      </SelectField>
-      <InputField label="Mật khẩu *" type="password" placeholder="Tối thiểu 6 ký tự"
-        value={form.password} onChange={set('password')} error={errors.password} />
-      <InputField label="Xác nhận mật khẩu *" type="password" placeholder="Nhập lại mật khẩu"
-        value={form.confirmPassword} onChange={set('confirmPassword')} error={errors.confirmPassword} />
+    <div className="space-y-4 animate-fadeIn">
+      {/* ── Thông tin chủ sở hữu ── */}
+      <div>
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-emerald-500">
+          👤 Thông tin chủ sở hữu
+        </p>
+        <div className="space-y-3">
+          <InputField
+            label="Họ và tên *" placeholder="Nguyễn Văn A"
+            value={form.fullName} onChange={set('fullName')} error={errors.fullName}
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <InputField
+              label="Số điện thoại *" placeholder="0912345678"
+              value={form.phone} onChange={set('phone')} error={errors.phone}
+            />
+            <InputField
+              label="Ngày sinh *" type="date"
+              value={form.dob} onChange={set('dob')} error={errors.dob}
+            />
+          </div>
+          <InputField
+            label="Email chủ sở hữu *" type="email" placeholder="owner@example.com"
+            value={form.empEmail} onChange={set('empEmail')} error={errors.empEmail}
+          />
+        </div>
+      </div>
+
+      <div className="border-t border-slate-800" />
+
+      {/* ── Thông tin tài khoản ── */}
+      <div>
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-emerald-500">
+          🔑 Thông tin tài khoản
+        </p>
+        <div className="space-y-3">
+          <InputField
+            label="Tên đăng nhập *" placeholder="admin01"
+            value={form.username} onChange={set('username')} error={errors.username}
+          />
+          <InputField
+            label="Email tài khoản *" type="email" placeholder="login@example.com"
+            hint="Email dùng để đăng nhập hệ thống"
+            value={form.accEmail} onChange={set('accEmail')} error={errors.accEmail}
+          />
+          <InputField
+            label="Mật khẩu *" type="password" placeholder="Tối thiểu 6 ký tự"
+            value={form.password} onChange={set('password')} error={errors.password}
+          />
+          <InputField
+            label="Xác nhận mật khẩu *" type="password" placeholder="Nhập lại mật khẩu"
+            value={form.confirmPassword} onChange={set('confirmPassword')} error={errors.confirmPassword}
+          />
+        </div>
+      </div>
 
       <button
-        onClick={handleSubmit}
-        disabled={loading}
-        className="mt-2 w-full rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-slate-950 disabled:opacity-60 flex items-center justify-center gap-2 transition-opacity"
+        onClick={handleNext}
+        className="mt-2 w-full rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-slate-950
+          flex items-center justify-center gap-2 hover:bg-emerald-400 transition-colors"
       >
-        {loading && <span className="h-3.5 w-3.5 rounded-full border-2 border-slate-950 border-t-transparent animate-spin" />}
-        {loading ? 'Đang tạo tài khoản...' : 'Tiếp theo → Tạo cửa hàng'}
+        Tiếp theo → Thông tin cửa hàng
       </button>
     </div>
   )
 }
 
-// ── STEP 2: CỬA HÀNG ──────────────────────────────────────────
-function Step2({ accountId, onBack, onDone }) {
+// ─── STEP 2 — Thông tin cửa hàng ────────────────────────────────────────────
+function Step2({ step1Data, onBack, onDone }) {
   const toast = useToast()
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({
-    storeCode: '', storeName: '', address: '', phone: '',
-    email: '', openTime: '08:00', closeTime: '22:00', storeType: 'Cafe',
+    storeCode: '', storeName: '', address: '',
+    storeEmail: '', openTime: '08:00', closeTime: '22:00',
   })
   const [errors, setErrors] = useState({})
 
@@ -182,39 +187,66 @@ function Step2({ accountId, onBack, onDone }) {
 
   const validate = () => {
     const e = {}
-    if (!form.storeCode.trim())  e.storeCode  = 'Vui lòng nhập mã cửa hàng'
-    if (form.storeCode.length > 20) e.storeCode = 'Tối đa 20 ký tự'
-    if (!form.storeName.trim())  e.storeName  = 'Vui lòng nhập tên cửa hàng'
-    if (!form.address.trim())    e.address    = 'Vui lòng nhập địa chỉ'
-    if (form.phone && !/^(0|\+84)[0-9]{9,10}$/.test(form.phone))
-      e.phone = 'Số điện thoại không hợp lệ'
-    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      e.email = 'Email không hợp lệ'
+    if (!form.storeCode.trim())
+      e.storeCode = 'Vui lòng nhập mã cửa hàng'
+    else if (form.storeCode.length > 20)
+      e.storeCode = 'Tối đa 20 ký tự'
+    if (!form.storeName.trim())
+      e.storeName = 'Vui lòng nhập tên cửa hàng'
+    if (!form.address.trim())
+      e.address = 'Vui lòng nhập địa chỉ'
+    if (form.storeEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.storeEmail))
+      e.storeEmail = 'Email không hợp lệ'
     return e
   }
+
+  // Đóng gói toàn bộ data thành RegisterNewStore và gọi 1 API duy nhất
+  const buildPayload = () => ({
+    storeCode: form.storeCode,
+    storeName: form.storeName,
+    address:   form.address,
+    email:     form.storeEmail || undefined,
+    openTime:  form.openTime + ':00',   // LocalTime: "HH:mm:ss"
+    closeTime: form.closeTime + ':00',
+    employee: {
+      fullName: step1Data.fullName,
+      phone:    step1Data.phone,
+      email:    step1Data.empEmail,
+      dob:      step1Data.dob ? step1Data.dob + 'T00:00:00' : undefined, // LocalDateTime
+      accountCreateRequest: {
+        username: step1Data.username,
+        password: step1Data.password,
+        email:    step1Data.accEmail,
+      },
+    },
+  })
 
   const handleSubmit = async () => {
     const e = validate()
     if (Object.keys(e).length) { setErrors(e); return }
 
     setLoading(true)
-    const accountId = localStorage.getItem('accountId')  // ← lấy accountId đã lưu tạm ở bước 1
     try {
-      const res = await createStore({
-        storeCode: form.storeCode,
-        storeName: form.storeName,
-        address:   form.address,
-        phone:     form.phone   || undefined,
-        email:     form.email   || undefined,
-        openTime:  form.openTime,
-        closeTime: form.closeTime,
-        accountId,
-      })
-      toast.success('Tạo cửa hàng thành công!', 'Chào mừng bạn đến với hệ thống!')
-      localStorage.removeItem('accountId') 
+      await registerNewStore(buildPayload())
+      toast.success('Đăng ký thành công!', 'Chào mừng bạn đến với hệ thống!')
       onDone()
     } catch (err) {
-      toast.error('Có lỗi xảy ra!', 'Không thể tạo cửa hàng, vui lòng thử lại')
+      console.error('Register error:', err)
+      // Map lỗi server trả về field tương ứng
+      const fieldErrors = {}
+      ;(err.errors ?? []).forEach(({ code }) => {
+        const mapped = SERVER_ERROR_CODES[code]
+        if (mapped) fieldErrors[mapped.field] = mapped.message
+      })
+      if (Object.keys(fieldErrors).length) {
+        // Có lỗi ở step 1 → quay lại và hiển thị lỗi (thông báo user)
+        toast.error(
+          'Thông tin tài khoản bị trùng!',
+          'Vui lòng quay lại bước 1 và kiểm tra lại tên đăng nhập hoặc email.'
+        )
+      } else {
+        toast.error('Có lỗi xảy ra!', err.message ?? 'Không thể tạo cửa hàng, vui lòng thử lại.')
+      }
     } finally {
       setLoading(false)
     }
@@ -223,81 +255,93 @@ function Step2({ accountId, onBack, onDone }) {
   return (
     <div className="space-y-3 animate-fadeIn">
       <div className="grid grid-cols-2 gap-3">
-        <InputField label="Mã cửa hàng *" placeholder="STR001"
-          value={form.storeCode} onChange={set('storeCode')} error={errors.storeCode} />
-        <SelectField label="Loại hình" value={form.storeType} onChange={set('storeType')}>
-          {STORE_TYPES.map(t => <option key={t}>{t}</option>)}
-        </SelectField>
+        <InputField
+          label="Mã cửa hàng *" placeholder="STR001"
+          value={form.storeCode} onChange={set('storeCode')} error={errors.storeCode}
+        />
+        <InputField
+          label="Email cửa hàng" type="email" placeholder="store@example.vn"
+          value={form.storeEmail} onChange={set('storeEmail')} error={errors.storeEmail}
+        />
       </div>
-      <InputField label="Tên cửa hàng *" placeholder="Highland Coffee Nguyễn Trãi"
-        value={form.storeName} onChange={set('storeName')} error={errors.storeName} />
-      <InputField label="Địa chỉ *" placeholder="123 Nguyễn Trãi, Quận 1, TP.HCM"
-        value={form.address} onChange={set('address')} error={errors.address} />
+      <InputField
+        label="Tên cửa hàng *" placeholder="Highland Coffee Nguyễn Trãi"
+        value={form.storeName} onChange={set('storeName')} error={errors.storeName}
+      />
+      <InputField
+        label="Địa chỉ *" placeholder="123 Nguyễn Trãi, Quận 1, TP.HCM"
+        value={form.address} onChange={set('address')} error={errors.address}
+      />
       <div className="grid grid-cols-2 gap-3">
-        <InputField label="Số điện thoại" placeholder="0912345678"
-          value={form.phone} onChange={set('phone')} error={errors.phone} />
-        <InputField label="Email cửa hàng" type="email" placeholder="store@example.vn"
-          value={form.email} onChange={set('email')} error={errors.email} />
+        <InputField
+          label="Giờ mở cửa" type="time"
+          value={form.openTime} onChange={set('openTime')}
+        />
+        <InputField
+          label="Giờ đóng cửa" type="time"
+          value={form.closeTime} onChange={set('closeTime')}
+        />
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <InputField label="Giờ mở cửa" type="time"
-          value={form.openTime} onChange={set('openTime')} />
-        <InputField label="Giờ đóng cửa" type="time"
-          value={form.closeTime} onChange={set('closeTime')} />
+
+      {/* Tóm tắt step 1 */}
+      <div className="rounded-lg border border-slate-700/60 bg-slate-800/40 px-3 py-2 text-[10px] text-slate-400 space-y-0.5">
+        <p className="text-slate-300 font-semibold mb-1">✅ Đã xác nhận ở bước 1</p>
+        <p>👤 Chủ sở hữu: <span className="text-slate-200">{step1Data.fullName}</span></p>
+        <p>🔑 Tài khoản: <span className="text-slate-200">{step1Data.username}</span></p>
       </div>
 
       <div className="flex gap-2 mt-2">
         <button
           onClick={onBack}
           disabled={loading}
-          className="rounded-lg border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-300 hover:border-slate-500 transition-colors disabled:opacity-40"
+          className="rounded-lg border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-300
+            hover:border-slate-500 transition-colors disabled:opacity-40"
         >
           ← Quay lại
         </button>
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="flex-1 rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-slate-950 disabled:opacity-60 flex items-center justify-center gap-2 transition-opacity"
+          className="flex-1 rounded-lg bg-emerald-500 py-2 text-xs font-semibold text-slate-950
+            disabled:opacity-60 flex items-center justify-center gap-2 hover:bg-emerald-400 transition-colors"
         >
-          {loading && <span className="h-3.5 w-3.5 rounded-full border-2 border-slate-950 border-t-transparent animate-spin" />}
-          {loading ? 'Đang tạo cửa hàng...' : '🎉 Tạo cửa hàng & vào hệ thống'}
+          {loading && (
+            <span className="h-3.5 w-3.5 rounded-full border-2 border-slate-950 border-t-transparent animate-spin" />
+          )}
+          {loading ? 'Đang tạo cửa hàng...' : '🎉 Hoàn tất & vào hệ thống'}
         </button>
       </div>
     </div>
   )
 }
 
-// ── MAIN COMPONENT ────────────────────────────────────────────
+// ─── MAIN ────────────────────────────────────────────────────────────────────
 export function RegisterPage() {
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
   const [step, setStep] = useState(1)
-  const [accountId, setAccountId] = useState(null)
-  const [slideDir, setSlideDir] = useState('right')
 
-  const goToStep2 = (id) => {
-    setSlideDir('right')
-    setAccountId(id)
-    setTimeout(() => setStep(2), 50)
+  // Data từ step 1 được giữ ở đây để truyền xuống step 2 khi submit
+  const [step1Data, setStep1Data] = useState({
+    // Employee
+    fullName: '', phone: '', empEmail: '', dob: '',
+    // Account
+    username: '', accEmail: '', password: '', confirmPassword: '',
+  })
+
+  const goToStep2 = (data) => {
+    setStep1Data(data)
+    setStep(2)
   }
 
-  const goBack = () => {
-    setSlideDir('left')
-    setTimeout(() => setStep(1), 50)
-  }
+  const goBack = () => setStep(1)
 
-  const handleDone = () => {
-    navigate('/login')
-  }
+  const handleDone = () => navigate('/login')
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
       <style>{`
         @keyframes fadeInRight {
           from { opacity: 0; transform: translateX(24px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes fadeInLeft {
-          from { opacity: 0; transform: translateX(-24px); }
           to   { opacity: 1; transform: translateX(0); }
         }
         .animate-fadeIn {
@@ -312,38 +356,24 @@ export function RegisterPage() {
             POS
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-50">
-              Tạo tài khoản &amp; cửa hàng
-            </p>
-            <p className="text-[11px] text-slate-400">
-              Đăng ký để bắt đầu quản lý cửa hàng
-            </p>
+            <p className="text-sm font-semibold text-slate-50">Đăng ký cửa hàng</p>
+            <p className="text-[11px] text-slate-400">Đăng ký để bắt đầu quản lý cửa hàng</p>
           </div>
         </div>
 
         <StepIndicator step={step} />
 
-        {/* Step title */}
         <p className="mb-3 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-          {step === 1 ? 'Bước 1 · Thông tin tài khoản' : 'Bước 2 · Thông tin cửa hàng'}
+          {step === 1 ? 'Bước 1 · Tài khoản & chủ sở hữu' : 'Bước 2 · Thông tin cửa hàng'}
         </p>
 
-        {/* Note lỗ hổng - nhắc user */}
-        {step === 2 && (
-          <div className="mb-3 rounded-lg border border-amber-800/50 bg-amber-950/30 px-3 py-2 text-[10px] text-amber-400">
-            ⚠ Tài khoản chỉ hoạt động sau khi hoàn tất tạo cửa hàng. Vui lòng không thoát trang.
-          </div>
-        )}
-
-        {/* Steps */}
         <div key={step}>
           {step === 1
-            ? <Step1 onSuccess={goToStep2} />
-            : <Step2 accountId={accountId} onBack={goBack} onDone={handleDone} />
+            ? <Step1 initialData={step1Data} onSuccess={goToStep2} />
+            : <Step2 step1Data={step1Data} onBack={goBack} onDone={handleDone} />
           }
         </div>
 
-        {/* Login link */}
         {step === 1 && (
           <p className="mt-3 text-center text-[11px] text-slate-400">
             Đã có tài khoản?{' '}
