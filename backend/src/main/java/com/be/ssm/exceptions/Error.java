@@ -72,9 +72,11 @@ public enum Error {
 
         // Invoices errors
         INVOICE_NOT_FOUND(100001, "Invoice not found", HttpStatus.NOT_FOUND),
+        INVOICE_ALREADY_PAID(110004, "Invoice already paid", HttpStatus.BAD_REQUEST),
 
         // Orders errors
         ORDER_NOT_FOUND(110002, "Order not found", HttpStatus.NOT_FOUND),
+        ORDER_ALREADY_COMPLETED(110003, "Order already completed", HttpStatus.BAD_REQUEST),
 
         // Order items errors
         ORDER_ITEM_NOT_FOUND(110003, "Order item not found", HttpStatus.NOT_FOUND),
@@ -108,6 +110,8 @@ public enum Error {
         QUOTA_EXCEEDED(34005, "Quota limit exceeded", HttpStatus.BAD_REQUEST),
         WORKFLOW_VIOLATION(34006, "Action violates workflow rules", HttpStatus.BAD_REQUEST),
         DATA_INTEGRITY_VIOLATION(34007, "Data integrity constraint violation", HttpStatus.CONFLICT),
+
+
 
         ;
 

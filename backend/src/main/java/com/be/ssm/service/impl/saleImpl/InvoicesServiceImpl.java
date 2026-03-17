@@ -5,6 +5,8 @@ import com.be.ssm.dto.request.sale.InvoiceUpdateRequest;
 import com.be.ssm.dto.response.sale.InvoiceResponse;
 import com.be.ssm.entities.sales.Invoices;
 import com.be.ssm.entities.sales.Orders;
+import com.be.ssm.enums.sales.InvoiceStatus;
+import com.be.ssm.enums.sales.OrderStatus;
 import com.be.ssm.exceptions.CustomException;
 import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.sales.InvoicesMapper;
@@ -36,8 +38,15 @@ public class InvoicesServiceImpl implements InvoicesService {
         log.info("Create new invoice");
         Orders order = findOrderById(request.getOrderId());
 
+        if(order.getStatus() == OrderStatus.COMPLETED){
+            throw new CustomException(Error.ORDER_ALREADY_COMPLETED);
+        }
+
         Invoices invoice = mapper.toInvoiceEntity(request);
         invoice.setOrder(order);
+
+        invoice.setStatus(InvoiceStatus.UNPAID);
+        invoice.setTotalAmount(order.getGrandTotal());
 
         return mapper.toInvoiceResponse(repository.save(invoice));
     }

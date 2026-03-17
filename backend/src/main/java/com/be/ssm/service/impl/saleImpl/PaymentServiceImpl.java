@@ -4,12 +4,21 @@ import com.be.ssm.dto.request.sale.PaymentCreateRequest;
 import com.be.ssm.dto.request.sale.PaymentUpdateRequest;
 import com.be.ssm.dto.response.sale.PaymentResponse;
 import com.be.ssm.entities.sales.Invoices;
+import com.be.ssm.entities.sales.Orders;
 import com.be.ssm.entities.sales.Payments;
+import com.be.ssm.entities.store.StoreTables;
+import com.be.ssm.enums.sales.InvoiceStatus;
+import com.be.ssm.enums.sales.OrderStatus;
+import com.be.ssm.enums.sales.PaymentMethod;
+import com.be.ssm.enums.sales.PaymentStatus;
+import com.be.ssm.enums.store.TableStatus;
 import com.be.ssm.exceptions.CustomException;
 import com.be.ssm.exceptions.Error;
 import com.be.ssm.mapper.sales.PaymentMapper;
 import com.be.ssm.repository.sales.InvoicesRepository;
+import com.be.ssm.repository.sales.OrdersRepository;
 import com.be.ssm.repository.sales.PaymentsRepository;
+import com.be.ssm.repository.store.StoreTablesRepository;
 import com.be.ssm.service.sale.PaymentService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +32,8 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentsRepository repository;
     private final InvoicesRepository invoicesRepository;
     private final PaymentMapper mapper;
+    private final OrdersRepository ordersRepository;
+    private final StoreTablesRepository storeTablesRepository;
 
     @Override
     public PaymentResponse getById(Integer id) {
@@ -36,10 +47,21 @@ public class PaymentServiceImpl implements PaymentService {
         log.info("Create new payment");
         Invoices invoice = findInvoiceById(request.getInvoiceId());
 
+        if (invoice.getStatus() == InvoiceStatus.PAID) {
+            throw new CustomException(Error.INVOICE_ALREADY_PAID);
+        }
+
         Payments payment = mapper.toPaymentEntity(request);
         payment.setInvoice(invoice);
+        payment.setStatus(PaymentStatus.PENDING);
 
-        return mapper.toPaymentResponse(repository.save(payment));
+        Payments saved = repository.save(payment);
+
+        if (payment.getMethod() == PaymentMethod.CASH) {
+            completePayment(saved);
+        }
+
+        return mapper.toPaymentResponse(saved);
     }
 
     @Override
@@ -67,5 +89,23 @@ public class PaymentServiceImpl implements PaymentService {
 
         return invoicesRepository.findById(id)
                 .orElseThrow(()-> new CustomException(Error.INVOICE_NOT_FOUND));
+    }
+
+    private void completePayment(Payments payment) {
+
+        payment.setStatus(PaymentStatus.COMPLETE);
+        repository.save(payment);
+
+        Invoices invoice = payment.getInvoice();
+        invoice.setStatus(InvoiceStatus.PAID);
+        invoicesRepository.save(invoice);
+
+        Orders order = invoice.getOrder();
+        order.setStatus(OrderStatus.COMPLETED);
+        ordersRepository.save(order);
+
+        StoreTables table = order.getStoreTables();
+        table.setStatus(TableStatus.AVAILABLE);
+        storeTablesRepository.save(table);
     }
 }

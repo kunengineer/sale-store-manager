@@ -1,5 +1,6 @@
 package com.be.ssm.entities.sales;
 
+import com.be.ssm.enums.sales.InvoiceStatus;
 import com.be.ssm.enums.sales.InvoiceType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,10 @@ public class Invoices {
     @Enumerated(EnumType.STRING)
     @Column(name = "invoice_type", nullable = false, length = 20)
     private InvoiceType invoiceType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private InvoiceStatus status;
 
     @Column(name = "buyer_name", length = 150)
     private String buyerName;
