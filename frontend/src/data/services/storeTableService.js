@@ -13,3 +13,12 @@ export const createTable = async (payload) => {
 export const updateTable = async (id, payload) => {
   return await axiosInstance.put(`${STORE_TABLE_API}/${id}`, payload)
 }
+
+
+export const moveTableApi = async (payload) => {
+  return axiosInstance.put(`${STORE_TABLE_API}/move`, payload)
+}
+
+export const getTablesApi = async () => {
+  return axiosInstance.get(`/store-tables/filter?page=1&size=100`);
+};

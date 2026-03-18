@@ -8,6 +8,16 @@ import {
   deleteOrderItems,
 } from "../data/services/orderService";
 import CustomerSearchBox from "./CustomerSearchBox";
+import { moveTableApi } from "../data/services/storeTableService";
+
+export const TABLE_STATUS = {
+  AVAILABLE: "AVAILABLE",
+  OCCUPIED: "OCCUPIED",
+  RESERVED: "RESERVED",
+  MERGED: "MERGED",
+  INACTIVE: "INACTIVE",
+  MAINTENANCE: "MAINTENANCE",
+};
 
 // ─────────────────────────────────────────────────────────────
 // HELPERS
@@ -281,12 +291,51 @@ function PaymentModal({
 // ─────────────────────────────────────────────────────────────
 // CHANGE TABLE MODAL
 // ─────────────────────────────────────────────────────────────
+
 function ChangeTableModal({ open, onClose }) {
   const { tables, selectedTable, selectTable } = usePos();
+  const { reloadTables } = usePos(); 
+  const [loading, setLoading] = useState(false);
+
   if (!open) return null;
+
+
+  const handleChangeTable = async (toTableId) => {
+    if (!selectedTable || loading) return;
+
+    if (selectedTable.id === toTableId) return;
+
+    try {
+      setLoading(true);
+
+      onClose();
+
+      await moveTableApi({
+        fromTableId: selectedTable.id,
+        toTableId: toTableId,
+      });
+
+      await reloadTables();
+
+      await selectTable(toTableId);
+    } catch (err) {
+      console.error(err);
+
+      alert("Chuyển bàn thất bại");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60">
-      <div className="w-full max-w-sm rounded-xl border border-[var(--border)] bg-[var(--surface-solid)] p-3 text-xs text-[var(--text)]">
+    <div
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/60"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-xl border border-[var(--border)] bg-[var(--surface-solid)] p-3 text-xs text-[var(--text)]"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="mb-2 flex items-center justify-between">
           <p className="text-sm font-bold">Đổi bàn</p>
           <button
@@ -302,31 +351,42 @@ function ChangeTableModal({ open, onClose }) {
           Chọn bàn muốn chuyển hoá đơn hiện tại sang.
         </p>
         <div className="grid grid-cols-3 gap-2">
-          {tables.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => {
-                selectTable(t.id);
-                onClose();
-              }}
-              className={`rounded-lg border px-2 py-1.5 text-left text-[11px] transition-all
-                ${
-                  selectedTable?.id === t.id
-                    ? "border-emerald-500 bg-emerald-500/10"
-                    : "border-[var(--border)] bg-[var(--surface-2)] hover:border-emerald-500/50"
-                }`}
-            >
-              <span className="block font-semibold">{t.name}</span>
-              <span className="block text-[10px] text-[var(--muted)]">
-                {t.status === "using"
-                  ? `${t.guests ?? 0} khách`
-                  : t.status === "reserved"
-                    ? "Đã đặt"
-                    : "Trống"}
-              </span>
-            </button>
-          ))}
+          {tables.map((t) => {
+            const isSame = selectedTable?.id === t.id;
+            const isAvailable = t.status === TABLE_STATUS.AVAILABLE || isSame;
+
+            return (
+              <button
+                key={t.id}
+                disabled={!isAvailable || loading}
+                type="button"
+                onClick={() => handleChangeTable(t.id)}
+                className={`p-2 border rounded
+        ${isSame ? "bg-green-100 border-green-500" : ""}
+        ${
+          !isAvailable
+            ? "opacity-40 cursor-not-allowed"
+            : "hover:border-green-500"
+        }
+      `}
+              >
+                <span className="block font-semibold">{t.name}</span>
+                <span className="block text-[10px] text-[var(--muted)]">
+                  {t.status === "OCCUPIED"
+                    ? `${t.guests ?? 0} khách`
+                    : t.status === "RESERVED"
+                      ? "Đã đặt"
+                      : t.status === "AVAILABLE"
+                        ? "Trống"
+                        : t.status === "MERGED"
+                          ? "Đã gộp"
+                          : t.status === "MAINTENANCE"
+                            ? "Bảo trì"
+                            : "Tạm khóa"}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -557,8 +617,6 @@ export function PosOrderColumn() {
       // Cập nhật snapshot sau khi lưu thành công
       lastSavedSnapshot.current = buildSnapshot(orderItems);
       setHasUnsaved(false);
-
-
     } catch (err) {
       console.error("Lưu tạm thất bại:", err);
       setDraftError(err?.message ?? "Lưu tạm thất bại. Vui lòng thử lại.");
@@ -584,20 +642,26 @@ export function PosOrderColumn() {
               <p className="text-sm font-semibold text-[var(--text)]">
                 {selectedTable ? `Bàn ${selectedTable.name}` : "Chưa chọn bàn"}
               </p>
-              {tableTimeText && (
+              {tableTimeText && selectedTable && (
                 <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-600">
-                  {selectedTable.status === "using" ? "Mở lúc" : "Đặt lúc"}{" "}
+                  {selectedTable.status === "OCCUPIED" ? "Mở lúc" : "Đặt lúc"}{" "}
                   {tableTimeText}
                 </span>
               )}
             </div>
             <p className="text-xs text-emerald-600">
               {selectedTable
-                ? selectedTable.status === "using"
+                ? selectedTable.status === "OCCUPIED"
                   ? `Đang phục vụ · ${selectedTable.guests ?? 0} khách`
-                  : selectedTable.status === "reserved"
+                  : selectedTable.status === "RESERVED"
                     ? "Đã đặt chỗ"
-                    : "Trống"
+                    : selectedTable.status === "AVAILABLE"
+                      ? "Bàn trống"
+                      : selectedTable.status === "MERGED"
+                        ? "Bàn đã gộp"
+                        : selectedTable.status === "MAINTENANCE"
+                          ? "Đang bảo trì"
+                          : "Tạm khóa"
                 : "Chọn bàn để tạo hóa đơn"}
             </p>
           </div>
