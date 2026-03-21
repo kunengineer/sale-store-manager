@@ -2,6 +2,7 @@ package com.be.ssm.service.impl.saleImpl;
 
 import com.be.ssm.dto.request.sale.InvoiceCreateRequest;
 import com.be.ssm.dto.request.sale.InvoiceUpdateRequest;
+import com.be.ssm.dto.request.sale.PayOrderRequest;
 import com.be.ssm.dto.response.sale.InvoiceResponse;
 import com.be.ssm.entities.sales.Invoices;
 import com.be.ssm.entities.sales.Orders;
@@ -13,6 +14,8 @@ import com.be.ssm.mapper.sales.InvoicesMapper;
 import com.be.ssm.repository.sales.InvoicesRepository;
 import com.be.ssm.repository.sales.OrdersRepository;
 import com.be.ssm.service.sale.InvoicesService;
+import com.be.ssm.service.sale.PaymentService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,8 @@ public class InvoicesServiceImpl implements InvoicesService {
     private final OrdersRepository ordersRepository;
     private final InvoicesMapper mapper;
 
+    private final PaymentService paymentService;
+
     @Override
     public InvoiceResponse getById(Integer id) {
         log.info("Getting invoice by id {}", id);
@@ -33,6 +38,7 @@ public class InvoicesServiceImpl implements InvoicesService {
         return mapper.toInvoiceResponse(findById(id));
     }
 
+    @Transactional
     @Override
     public InvoiceResponse create(InvoiceCreateRequest request) {
         log.info("Create new invoice");
@@ -44,9 +50,10 @@ public class InvoicesServiceImpl implements InvoicesService {
 
         Invoices invoice = mapper.toInvoiceEntity(request);
         invoice.setOrder(order);
+        invoice.setSubtotal(order.getGrandTotal());
+        Invoices saved = repository.save(invoice);
 
-        invoice.setStatus(InvoiceStatus.UNPAID);
-        invoice.setTotalAmount(order.getGrandTotal());
+        paymentService.pay(saved, request.getPaymentCreateRequest());
 
         return mapper.toInvoiceResponse(repository.save(invoice));
     }

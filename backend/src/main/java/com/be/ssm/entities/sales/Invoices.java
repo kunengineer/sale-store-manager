@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -42,8 +43,20 @@ public class Invoices {
     @Column(name = "buyer_name", length = 150)
     private String buyerName;
 
-    @Column(name = "total_amount", nullable = false, precision = 15, scale = 2)
-    private BigDecimal totalAmount;
+    @Column(name = "subtotal", nullable = false, precision = 15, scale = 2)
+    private BigDecimal subtotal;         // = sum(orderItems.lineTotal)
+
+    @Column(name = "discount_amount", nullable = false, precision = 15, scale = 2)
+    private BigDecimal discountAmount;
+
+    @Column(name = "vat", precision = 5, scale = 2)
+    private BigDecimal vat;              // %
+
+    @Column(name = "tax_amount", nullable = false, precision = 15, scale = 2)
+    private BigDecimal taxAmount;        // = subtotal * vat / 100
+
+    @Column(name = "grand_total", nullable = false, precision = 15, scale = 2)
+    private BigDecimal grandTotal;       // = subtotal - discount + tax
 
     @Column(name = "issued_at", nullable = false)
     private LocalDateTime issuedAt;
@@ -51,10 +64,27 @@ public class Invoices {
     @Column(name = "pdf_url", length = 255)
     private String pdfUrl;
 
+    @Column(name = "note", columnDefinition = "TEXT")
+    private String note;
+
     @PrePersist
     public void prePersist() {
-        if(this.invoiceNumber == null) this.invoiceNumber = buildInvoiceNumber();
+        if (this.invoiceNumber == null) this.invoiceNumber = buildInvoiceNumber();
+        if (this.discountAmount == null) this.discountAmount = BigDecimal.ZERO;
+        if (this.vat == null)            this.vat = BigDecimal.ZERO;
         this.issuedAt = LocalDateTime.now();
+        calculate();
+    }
+
+    private void calculate() {
+        this.taxAmount = subtotal
+                .multiply(vat)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+        this.grandTotal = subtotal
+                .subtract(discountAmount)
+                .add(taxAmount)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 
     private String buildInvoiceNumber() {

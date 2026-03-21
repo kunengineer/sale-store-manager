@@ -77,6 +77,31 @@ public class PaymentServiceImpl implements PaymentService {
         return mapper.toPaymentResponse(repository.save(payment));
     }
 
+    @Override
+    public void pay(Invoices invoices, PaymentCreateRequest request) {
+        Payments payment = mapper.toPaymentEntity(request);
+        payment.setInvoice(invoices);
+        switch (payment.getMethod()){
+            case CASH:
+                payment.setAmount(invoices.getGrandTotal());
+                payment.setAmountTendered(request.getAmountTendered());
+                payment.setChangeAmount(request.getChangeAmount());
+                break;
+
+            case CREDIT_CARD:
+
+                break;
+
+            default:
+
+                break;
+        }
+
+        repository.save(payment);
+        completePayment(payment);
+
+    }
+
     private Payments findById(Integer id) {
         log.info("Finding payment by id {}", id);
 

@@ -48,23 +48,9 @@ public class Orders {
     @Column(name = "status", nullable = false, length = 20)
     private OrderStatus status;
 
-    @Column(name = "subtotal", nullable = false, precision = 15, scale = 2)
-    private BigDecimal subtotal;
-
-    @Column(name = "discount_amount", nullable = false, precision = 15, scale = 2)
-    private BigDecimal discountAmount;
-
-    @Column(name = "vat", precision = 5, scale = 2)
-    private BigDecimal vat; // %
-
-    @Column(name = "tax_amount", nullable = false, precision = 15, scale = 2)
-    private BigDecimal taxAmount;
-
     @Column(name = "grand_total", nullable = false, precision = 15, scale = 2)
     private BigDecimal grandTotal;
 
-    @Column(name = "note", columnDefinition = "TEXT")
-    private String note;
 
     @OneToMany(
             mappedBy = "order",
@@ -91,26 +77,14 @@ public class Orders {
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (orderNumber == null) orderNumber = buildOrderNumber();
 
-        ensureDefaults();
         calculateTotals();
     }
 
     private void calculateTotals() {
-        subtotal = orderItems.stream()
+        grandTotal = orderItems.stream()
                 .map(OrderItems::getLineTotal)
                 .filter(Objects::nonNull)
                 .reduce(ZERO, BigDecimal::add)
-                .setScale(2, RoundingMode.HALF_UP);
-
-        // Tax tính trên subtotal (trước discount)
-        taxAmount = subtotal
-                .multiply(vat)
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-
-        // grandTotal = subtotal - discount + tax
-        grandTotal = subtotal
-                .subtract(discountAmount)
-                .add(taxAmount)
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
@@ -131,15 +105,9 @@ public class Orders {
     }
 
     public void recalculate(){
-        ensureDefaults();
         calculateTotals();
     }
 
-    private void ensureDefaults() {
-        if (vat == null)            vat            = ZERO;
-        if (discountAmount == null) discountAmount = ZERO;
-        if (taxAmount == null)      taxAmount      = ZERO;
-    }
 
     @Transient
     public void addItems(List<OrderItems> items) {

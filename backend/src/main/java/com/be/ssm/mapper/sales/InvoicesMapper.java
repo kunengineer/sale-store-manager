@@ -4,10 +4,7 @@ import com.be.ssm.dto.request.sale.InvoiceCreateRequest;
 import com.be.ssm.dto.request.sale.InvoiceUpdateRequest;
 import com.be.ssm.dto.response.sale.InvoiceResponse;
 import com.be.ssm.entities.sales.Invoices;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface InvoicesMapper {

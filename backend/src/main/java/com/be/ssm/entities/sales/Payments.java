@@ -40,6 +40,12 @@ public class Payments {
     @Column(name = "status", nullable = false, length = 20)
     private PaymentStatus status;
 
+    @Column(name = "amount_tendered", precision = 15, scale = 2)
+    private BigDecimal amountTendered;
+
+    @Column(name = "change_amount", precision = 15, scale = 2)
+    private BigDecimal changeAmount;
+
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
